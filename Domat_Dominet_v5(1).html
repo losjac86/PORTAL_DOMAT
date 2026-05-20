@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domat &amp; Dominet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+:root{
+  --bg:#0a0c12;--surf:#111520;--surf2:#171d2e;--surf3:#1e2540;
+  --b:#242d44;--b2:#2e3a58;--b3:#3a4a6b;
+  --acc:#3d7fff;--acc-g:rgba(61,127,255,.15);
+  --grn:#00e5a0;--org:#ffb020;--red:#ff4d6d;--pur:#b48aff;
+  --txt:#dce3f0;--txt2:#8896b3;--txt3:#4a5570;
+  --r:10px;--rs:6px;--rl:16px;
+}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:14px}
+.app{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sb{width:220px;min-width:220px;background:var(--surf);border-right:1px solid var(--b);display:flex;flex-direction:column;overflow-y:auto}
+.sb-head{padding:20px 16px 16px;border-bottom:1px solid var(--b)}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sb-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--pur));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sb-logo h1{font-size:13px;font-weight:700}
+.sb-logo p{font-size:10px;color:var(--txt3);margin-top:1px}
+.co-pill{background:var(--surf2);border:1px solid var(--b2);border-radius:var(--rs);padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:.15s}
+.co-pill:hover{border-color:var(--acc)}
+.co-name{font-size:12px;font-weight:600;color:var(--acc)}
+.co-sub{font-size:10px;color:var(--txt3);margin-top:1px}
+.nav-g{padding:12px 10px 4px}
+.nav-lbl{font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;padding:0 6px;margin-bottom:4px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:var(--rs);cursor:pointer;font-size:13px;font-weight:500;color:var(--txt2);margin-bottom:1px;border:1px solid transparent;transition:.15s;position:relative;user-select:none}
+.ni:hover{background:var(--surf2);color:var(--txt)}
+.ni.active{background:var(--acc-g);color:var(--acc);border-color:rgba(61,127,255,.2)}
+.ni .ic{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;min-width:16px;text-align:center}
+.nbadge.w{background:var(--org);color:#000}
+.sb-foot{margin-top:auto;padding:12px 10px;border-top:1px solid var(--b)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;background:var(--surf);flex-shrink:0}
+.topbar h2{font-size:18px;font-weight:700}
+.topbar p{font-size:12px;color:var(--txt2);margin-top:2px}
+.tb-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--rs);font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-p{background:var(--acc);color:#fff}.btn-p:hover{background:#2d6fee;transform:translateY(-1px)}
+.btn-s{background:var(--surf2);color:var(--txt);border:1px solid var(--b2)}.btn-s:hover{background:var(--surf3)}
+.btn-g{background:rgba(0,229,160,.12);color:var(--grn);border:1px solid rgba(0,229,160,.25)}.btn-g:hover{background:rgba(0,229,160,.2)}
+.btn-d{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}.btn-d:hover{background:rgba(255,77,109,.2)}
+.btn-o{background:rgba(255,176,32,.12);color:var(--org);border:1px solid rgba(255,176,32,.25)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.sc{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:16px;transition:.2s}
+.sc:hover{border-color:var(--b2);transform:translateY(-1px)}
+.sc-ico{font-size:20px;margin-bottom:8px}
+.sc-val{font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.sc-lbl{font-size:11px;color:var(--txt2);margin-top:3px;font-weight:500}
+
+/* TABLE */
+.tw{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);overflow:hidden}
+.th{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tt{font-size:14px;font-weight:700;white-space:nowrap}
+.tc{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sbox{display:flex;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--b);border-radius:var(--rs);padding:6px 10px}
+.sbox input{background:none;border:none;outline:none;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;width:160px}
+.sbox input::placeholder{color:var(--txt3)}
+.fsel{background:var(--surf2);border:1px solid var(--b);border-radius:var(--rs);padding:6px 10px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:.8px;text-transform:uppercase;background:var(--surf2);border-bottom:1px solid var(--b)}
+td{padding:11px 14px;font-size:12px;color:var(--txt);border-bottom:1px solid var(--b);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.bg{background:rgba(0,229,160,.12);color:var(--grn)}
+.br{background:rgba(255,77,109,.12);color:var(--red)}
+.by{background:rgba(255,176,32,.12);color:var(--org)}
+.bb{background:rgba(61,127,255,.12);color:var(--acc)}
+.bp{background:rgba(180,138,255,.12);color:var(--pur)}
+.bgr{background:rgba(136,150,179,.12);color:var(--txt2)}
+
+/* TILES */
+.tile{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;transition:all .2s;cursor:pointer}
+.tile:hover{border-color:var(--b2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.tile:active{transform:translateY(0)}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.ov.open{display:flex}
+.modal{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rl);width:700px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-lg{width:860px}
+.mh{padding:22px 24px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surf);z-index:1}
+.mh h3{font-size:16px;font-weight:700}
+.mb{padding:24px}
+.mf{padding:16px 24px;border-top:1px solid var(--b);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surf)}
+.x-btn{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:18px;padding:4px;border-radius:4px;transition:.15s}
+.x-btn:hover{color:var(--txt);background:var(--surf2)}
+
+/* FORMS */
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.s2{grid-column:span 2}
+.fg.s3{grid-column:span 3}
+label{font-size:11px;font-weight:600;color:var(--txt2);letter-spacing:.4px}
+.req{color:var(--red)}
+input,select,textarea{background:var(--surf2);border:1px solid var(--b2);border-radius:var(--rs);padding:8px 10px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;transition:.15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-g)}
+select option{background:var(--surf2)}
+textarea{resize:vertical;min-height:70px}
+.fsep{grid-column:1/-1;border:none;border-top:1px solid var(--b);margin:4px 0}
+.flbl{grid-column:1/-1;font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.chk-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chk-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--txt)}
+.chk-lbl input[type=checkbox]{width:auto;accent-color:var(--acc)}
+
+/* ALERTS */
+.al{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--rs);margin-bottom:8px;border-left:3px solid}
+.al-d{background:rgba(255,77,109,.07);border-color:var(--red)}
+.al-w{background:rgba(255,176,32,.07);border-color:var(--org)}
+.al-s{background:rgba(0,229,160,.07);border-color:var(--grn)}
+.al-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.al-body{flex:1}
+.al-title{font-size:12px;font-weight:600}
+.al-desc{font-size:11px;color:var(--txt2);margin-top:2px}
+.al-date{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);white-space:nowrap}
+
+/* PAGES */
+.pg{display:none}.pg.active{display:block}
+
+/* WORKER DETAIL */
+.wd-tabs{display:flex;gap:4px;margin-bottom:16px}
+.wtab{padding:7px 14px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;color:var(--txt2);background:none;border:1px solid transparent;transition:.15s;font-family:'IBM Plex Sans',sans-serif}
+.wtab:hover{background:var(--surf2);color:var(--txt)}
+.wtab.active{background:var(--acc-g);color:var(--acc);border-color:rgba(61,127,255,.2)}
+.wt{display:none}.wt.active{display:block}
+.igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.icard{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:14px}
+.icard-lbl{font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:.6px;text-transform:uppercase}
+.icard-val{font-size:13px;font-weight:600;margin-top:4px}
+.eq-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surf2);border-radius:var(--rs);margin-bottom:6px;border:1px solid var(--b)}
+
+/* IMPORT */
+.drop{border:2px dashed var(--b2);border-radius:var(--r);padding:30px;text-align:center;cursor:pointer;transition:.2s}
+.drop:hover{border-color:var(--acc);background:var(--acc-g)}
+.drop-ico{font-size:32px;margin-bottom:10px}
+
+/* PDF */
+.pdf{background:#fff;color:#000;padding:36px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;line-height:1.6;max-width:700px;margin:0 auto;border-radius:var(--r)}
+.pdf h2{font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
+.pdf-sub{text-align:center;font-size:11px;color:#666;margin-bottom:16px}
+.pdf hr{border:none;border-top:1px solid #ddd;margin:12px 0}
+.pdf-sec h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #3d7fff;padding-bottom:4px;margin-bottom:10px;color:#3d7fff}
+.pdf-sec{margin-bottom:14px}
+.pdf-f{display:flex;margin-bottom:5px}
+.pdf-fl{font-weight:600;width:190px;flex-shrink:0;font-size:11px;color:#444}
+.pdf-fv{border-bottom:1px solid #ccc;flex:1;min-height:18px;font-size:11px}
+.pdf-sign{display:flex;gap:40px;margin-top:28px}
+.pdf-sign-box{flex:1;border-top:1px solid #000;padding-top:8px;text-align:center;font-size:10px;color:#666}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surf2);border:1px solid var(--b2);border-radius:var(--rs);padding:12px 16px;font-size:12px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s;display:flex;align-items:center;gap:8px;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(0,229,160,.4);color:var(--grn)}
+.toast.err{border-color:rgba(255,77,109,.4);color:var(--red)}
+
+/* LOADER */
+.loader{position:fixed;inset:0;background:rgba(10,12,18,.85);z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px)}
+.loader.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--b2);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-txt{font-size:13px;color:var(--txt2)}
+
+/* MISC */
+.mono{font-family:'IBM Plex Mono',monospace;font-size:11px}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-txt" id="loader-txt">Łączenie z bazą danych...</div>
+</div>
+
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="sb-icon">🏗️</div>
+      <div><h1>Domat &amp; Dominet</h1><p>System zarządzania</p></div>
+    </div>
+    <div class="co-pill" onclick="navTo('settings')">
+      <div><div class="co-name" id="sb-co-name">— wybierz firmę —</div><div class="co-sub">Kliknij aby zmienić</div></div>
+      <span style="color:var(--txt3)">⚙</span>
+    </div>
+  </div>
+
+  <div class="nav-g">
+    <div class="nav-lbl">Główne</div>
+    <div class="ni active" data-page="dashboard" onclick="navTo('dashboard')"><span class="ic">📊</span>Dashboard</div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Zasoby ludzkie</div>
+    <div class="ni" data-page="workers" onclick="navTo('workers')"><span class="ic">👤</span>Pracownicy</div>
+    <div class="ni" data-page="equipment" onclick="navTo('equipment')"><span class="ic">🔧</span>Wyposażenie</div>
+    <div class="ni" data-page="medical-list" onclick="navTo('medical-list')"><span class="ic">🏥</span>Badania lek.<span class="nbadge w" id="bdg-med" style="display:none">0</span></div>
+    <div class="ni" data-page="medical-tiles" onclick="navTo('medical-tiles')"><span class="ic">🗂️</span>Przegląd badań</div>
+    <div class="ni" data-page="uprawnienia" onclick="navTo('uprawnienia')"><span class="ic">⚡</span>Uprawnienia<span class="nbadge" id="bdg-sep" style="display:none">0</span></div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Flota</div>
+    <div class="ni" data-page="vehicles" onclick="navTo('vehicles')"><span class="ic">🚗</span>Pojazdy<span class="nbadge" id="bdg-veh" style="display:none">0</span></div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Majątek</div>
+    <div class="ni" data-page="assets" onclick="navTo('assets')"><span class="ic">💼</span>Aktywa firmowe</div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Dokumenty</div>
+    <div class="ni" data-page="documents" onclick="navTo('documents')"><span class="ic">📄</span>Generuj dokumenty</div>
+    <div class="ni" data-page="import" onclick="navTo('import')"><span class="ic">📥</span>Import danych</div>
+  </div>
+  <div class="sb-foot">
+    <div class="ni" data-page="settings" onclick="navTo('settings')"><span class="ic">⚙️</span>Ustawienia firm</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="pg active">
+  <div class="topbar"><div><h2>Dashboard</h2><p id="today"></p></div>
+    <div class="tb-r">
+      <select class="fsel" id="dash-cf" onchange="renderDashboard()"><option value="">Wszystkie firmy</option></select>
+      <button class="btn btn-s btn-sm" onclick="exportJSON()">📤 Eksport JSON</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="stats" id="dash-stats"></div>
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--txt2)">⚠️ Alerty i terminy</h3>
+    <div id="dash-alerts"></div>
+    <div id="dash-tiles-wrap"></div>
+  </div>
+</div>
+
+<!-- PRACOWNICY -->
+<div id="pg-workers" class="pg">
+  <div class="topbar"><div><h2>Pracownicy</h2><p>Kartoteki osobowe</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openWModal()">+ Dodaj pracownika</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Lista pracowników</span>
+        <div class="tc">
+          <select class="fsel" id="wf-co" onchange="renderWorkers()"><option value="">Wszystkie firmy</option></select>
+          <select class="fsel" id="wf-dept" onchange="renderWorkers()"><option value="">Wszystkie działy</option></select>
+          <select class="fsel" id="wf-status" onchange="renderWorkers()"><option value="">Wszystkie statusy</option><option>Aktywny</option><option>Urlop</option><option>Zwolnienie lekarskie</option><option>Nieaktywny</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="wf-q" oninput="renderWorkers()"></div>
+        </div>
+      </div>
+      <table><thead><tr><th>Pracownik</th><th>PESEL</th><th>Stanowisko</th><th>Firma</th><th>Dział</th><th>Telefon</th><th>Status</th><th>Akcje</th></tr></thead>
+      <tbody id="w-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- KARTA PRACOWNIKA -->
+<div id="pg-worker-detail" class="pg">
+  <div class="topbar">
+    <div><h2 id="wd-name">—</h2><p id="wd-sub">—</p></div>
+    <div class="tb-r">
+      <button class="btn btn-s btn-sm" onclick="navTo('workers')">← Wróć</button>
+      <button class="btn btn-o btn-sm" id="wd-edit-btn">✏️ Edytuj</button>
+      <button class="btn btn-g btn-sm" onclick="genDoc('skierowanie')">🏥 Skierowanie</button>
+      <button class="btn btn-g btn-sm" onclick="navTo('documents')">📄 Umowa</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="wd-tabs">
+      <button class="wtab active" onclick="showWTab('info',this)">📋 Dane osobowe</button>
+      <button class="wtab" onclick="showWTab('equip',this)">🔧 Wyposażenie</button>
+      <button class="wtab" onclick="showWTab('medical',this)">🏥 Badania</button>
+      <button class="wtab" onclick="showWTab('docs',this)">📄 Dokumenty</button>
+    </div>
+    <div id="wt-info" class="wt active"><div class="igrid" id="wd-info-grid"></div></div>
+    <div id="wt-equip" class="wt">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:700">Wyposażenie pracownika</span>
+        <button class="btn btn-p btn-sm" onclick="openEModal()">+ Dodaj</button>
+      </div>
+      <div id="wd-equip-list"></div>
+    </div>
+    <div id="wt-medical" class="wt">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:700">Historia badań lekarskich</span>
+        <button class="btn btn-p btn-sm" id="add-med-btn">+ Dodaj badanie</button>
+      </div>
+      <div id="wd-med-list"></div>
+    </div>
+    <div id="wt-docs" class="wt">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-g btn-sm" onclick="genDoc('skierowanie')">🏥 Skierowanie</button>
+        <button class="btn btn-g btn-sm" onclick="genDoc('umowa-praca')">📄 Umowa o pracę</button>
+        <button class="btn btn-g btn-sm" onclick="genDoc('umowa-zlecenie')">📄 Umowa zlecenie</button>
+        <button class="btn btn-g btn-sm" onclick="genDoc('karta-wyposazenia')">🔧 Karta wyposażenia</button>
+        <button class="btn btn-p btn-sm" onclick="printDoc()">🖨️ Drukuj</button>
+      </div>
+      <div id="wd-doc-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WYPOSAŻENIE -->
+<div id="pg-equipment" class="pg">
+  <div class="topbar"><div><h2>Wyposażenie</h2><p>Rejestr narzędzi i sprzętu</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openEModal()">+ Dodaj wyposażenie</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Rejestr wyposażenia</span>
+        <div class="tc">
+          <select class="fsel" id="ef-cat" onchange="renderEquipment()"><option value="">Wszystkie kategorie</option></select>
+          <select class="fsel" id="ef-w" onchange="renderEquipment()"><option value="">Wszyscy pracownicy</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="ef-q" oninput="renderEquipment()"></div>
+        </div>
+      </div>
+      <table><thead><tr><th>Nazwa</th><th>Kategoria</th><th>Nr seryjny</th><th>Przypisany do</th><th>Data zakupu</th><th>Wartość</th><th>Gwarancja</th><th>Akcje</th></tr></thead>
+      <tbody id="e-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- BADANIA LIST -->
+<div id="pg-medical-list" class="pg">
+  <div class="topbar"><div><h2>Badania lekarskie</h2><p>Terminy i ważność</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openMModal()">+ Dodaj badanie</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Rejestr badań</span>
+        <div class="tc">
+          <select class="fsel" id="mf-s" onchange="renderMedicalList()"><option value="">Wszystkie</option><option value="ok">Aktualne</option><option value="warn">Wygasające</option><option value="exp">Przeterminowane</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="mf-q" oninput="renderMedicalList()"></div>
+        </div>
+      </div>
+      <table><thead><tr><th>Pracownik</th><th>Typ</th><th>Data badania</th><th>Ważne do</th><th>Pozostało</th><th>Status</th><th>Akcje</th></tr></thead>
+      <tbody id="m-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- BADANIA TILES -->
+<div id="pg-medical-tiles" class="pg">
+  <div class="topbar"><div><h2>Przegląd badań lekarskich</h2><p>Kafelki — status wszystkich pracowników</p></div>
+    <div class="tb-r">
+      <select class="fsel" id="mt-co" onchange="renderMedTiles()"><option value="">Wszystkie firmy</option></select>
+      <select class="fsel" id="mt-s" onchange="renderMedTiles()"><option value="">Wszyscy</option><option value="exp">🔴 Przeterminowane</option><option value="warn">🟡 Wygasające</option><option value="ok">🟢 Aktualne</option><option value="none">⚫ Brak badania</option></select>
+      <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="mt-q" oninput="renderMedTiles()"></div>
+      <button class="btn btn-p btn-sm" onclick="openMModal()">+ Dodaj badanie</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="mt-summary" class="stats" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div id="mt-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px"></div>
+  </div>
+</div>
+
+<!-- UPRAWNIENIA -->
+<div id="pg-uprawnienia" class="pg">
+  <div class="topbar"><div><h2>Uprawnienia pracowników</h2><p>SEP, prawo jazdy, UDT/operatorskie</p></div>
+    <div class="tb-r">
+      <select class="fsel" id="uf-co" onchange="renderUprawnienia()"><option value="">Wszystkie firmy</option></select>
+      <select class="fsel" id="uf-f" onchange="renderUprawnienia()"><option value="">Wszyscy</option><option value="sep">Ma SEP</option><option value="udt">Ma UDT</option><option value="pj">Ma prawo jazdy</option></select>
+      <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="uf-q" oninput="renderUprawnienia()"></div>
+    </div>
+  </div>
+  <div class="content">
+    <div id="uf-summary" class="stats" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div id="uf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div>
+  </div>
+</div>
+
+<!-- POJAZDY -->
+<div id="pg-vehicles" class="pg">
+  <div class="topbar"><div><h2>Flota pojazdów</h2><p>Przeglądy i ubezpieczenia</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openVModal()">+ Dodaj pojazd</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Rejestr pojazdów</span>
+        <div class="tc">
+          <select class="fsel" id="vf-co" onchange="renderVehicles()"><option value="">Wszystkie firmy</option></select>
+          <select class="fsel" id="vf-s" onchange="renderVehicles()"><option value="">Wszystkie</option><option value="warn">Wymagające uwagi</option><option value="exp">Przeterminowane</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="vf-q" oninput="renderVehicles()"></div>
+        </div>
+      </div>
+      <table><thead><tr><th>Pojazd</th><th>Nr rej.</th><th>Firma</th><th>Kierowca</th><th>Przegląd tech.</th><th>OC do</th><th>AC do</th><th>Status</th><th>Akcje</th></tr></thead>
+      <tbody id="v-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- AKTYWA -->
+<div id="pg-assets" class="pg">
+  <div class="topbar"><div><h2>Aktywa firmowe</h2><p>Majątek i inwentarz</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openAModal()">+ Dodaj aktywo</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Rejestr aktywów</span>
+        <div class="tc">
+          <select class="fsel" id="af-co" onchange="renderAssets()"><option value="">Wszystkie firmy</option></select>
+          <select class="fsel" id="af-cat" onchange="renderAssets()"><option value="">Wszystkie kategorie</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="af-q" oninput="renderAssets()"></div>
+        </div>
+      </div>
+      <table><thead><tr><th>Nazwa</th><th>Kategoria</th><th>Nr inw.</th><th>Firma</th><th>Lokalizacja</th><th>Wartość</th><th>Stan</th><th>Akcje</th></tr></thead>
+      <tbody id="a-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- DOKUMENTY -->
+<div id="pg-documents" class="pg">
+  <div class="topbar"><div><h2>Generuj dokumenty</h2><p>Umowy, skierowania, karty</p></div></div>
+  <div class="content">
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:20px">
+      <div class="tw" style="padding:16px;height:fit-content">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px">Wybierz dokument</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="fg"><label>Pracownik</label><select id="doc-w"><option value="">— wybierz —</option></select></div>
+          <div class="fg"><label>Typ dokumentu</label>
+            <select id="doc-type">
+              <option value="skierowanie">🏥 Skierowanie na badania</option>
+              <option value="umowa-praca">📄 Umowa o pracę</option>
+              <option value="umowa-zlecenie">📄 Umowa zlecenie</option>
+              <option value="karta-wyposazenia">🔧 Karta wyposażenia</option>
+            </select>
+          </div>
+          <button class="btn btn-p" onclick="generateDoc()">🖨️ Generuj podgląd</button>
+          <button class="btn btn-g" onclick="printDoc()">🖨️ Drukuj / PDF</button>
+        </div>
+      </div>
+      <div id="doc-preview" style="background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:20px;overflow-y:auto;max-height:calc(100vh - 180px)">
+        <div style="text-align:center;color:var(--txt3);padding:60px 20px"><div style="font-size:40px;margin-bottom:12px">📄</div><p>Wybierz pracownika i typ dokumentu</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT -->
+<div id="pg-import" class="pg">
+  <div class="topbar"><div><h2>Import danych</h2><p>Excel, CSV, JSON → Supabase</p></div></div>
+  <div class="content">
+    <div class="tw" style="padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">📋 Pobierz wzory plików</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="background:var(--surf2);border:1px solid var(--b2);border-radius:var(--r);padding:14px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px">👥 Wzór pracownicy</div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-g btn-sm" onclick="dlTemplate('workers','xlsx')">⬇️ Excel</button>
+            <button class="btn btn-s btn-sm" onclick="dlTemplate('workers','csv')">⬇️ CSV</button>
+          </div>
+        </div>
+        <div style="background:var(--surf2);border:1px solid var(--b2);border-radius:var(--r);padding:14px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px">🚗 Wzór pojazdy</div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-g btn-sm" onclick="dlTemplate('vehicles','xlsx')">⬇️ Excel</button>
+            <button class="btn btn-s btn-sm" onclick="dlTemplate('vehicles','csv')">⬇️ CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="tw" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">📥 Import pracowników</div>
+        <div class="drop" onclick="document.getElementById('imp-w').click()" ondragover="event.preventDefault();this.style.borderColor='var(--acc)'" ondragleave="this.style.borderColor=''" ondrop="event.preventDefault();this.style.borderColor='';importFile(event.dataTransfer.files[0],'workers')">
+          <div class="drop-ico">👥</div><p style="font-size:12px;color:var(--txt2)">Przeciągnij lub kliknij</p><p style="font-size:11px;color:var(--txt3)">.xlsx / .csv / .json</p>
+        </div>
+        <input type="file" id="imp-w" accept=".xlsx,.xls,.csv,.json" style="display:none" onchange="importFile(this.files[0],'workers')">
+        <div id="imp-w-res" style="margin-top:8px;font-size:12px"></div>
+      </div>
+      <div class="tw" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">🚗 Import pojazdów</div>
+        <div class="drop" onclick="document.getElementById('imp-v').click()" ondragover="event.preventDefault();this.style.borderColor='var(--acc)'" ondragleave="this.style.borderColor=''" ondrop="event.preventDefault();this.style.borderColor='';importFile(event.dataTransfer.files[0],'vehicles')">
+          <div class="drop-ico">🚗</div><p style="font-size:12px;color:var(--txt2)">Przeciągnij lub kliknij</p><p style="font-size:11px;color:var(--txt3)">.xlsx / .csv / .json</p>
+        </div>
+        <input type="file" id="imp-v" accept=".xlsx,.xls,.csv,.json" style="display:none" onchange="importFile(this.files[0],'vehicles')">
+        <div id="imp-v-res" style="margin-top:8px;font-size:12px"></div>
+      </div>
+    </div>
+    <div class="tw" style="padding:16px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">💾 Kopia zapasowa</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-s" onclick="exportJSON()">📤 Eksportuj JSON</button>
+        <button class="btn btn-s" onclick="document.getElementById('imp-bak').click()">📥 Importuj kopię</button>
+        <input type="file" id="imp-bak" accept=".json" style="display:none" onchange="importBackup(this.files[0])">
+        <button class="btn btn-d btn-sm" onclick="clearAll()">🗑️ Wyczyść wszystkie dane</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- USTAWIENIA -->
+<div id="pg-settings" class="pg">
+  <div class="topbar"><div><h2>Ustawienia firm</h2><p>Konfiguracja i dane firm</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openCoModal()">+ Dodaj firmę</button></div>
+  </div>
+  <div class="content">
+    <div class="tw" style="padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--b)">🏢 Zarejestrowane firmy</div>
+      <div id="co-list"></div>
+    </div>
+    <div class="tw" style="padding:20px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--b)">⚙️ Aktywna firma</div>
+      <div class="fg" style="max-width:300px"><label>Wybierz aktywną firmę (filtruje dashboard)</label>
+        <select id="active-co" onchange="setActiveCo(this.value)"><option value="">— wszystkie —</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+
+<!-- WORKER MODAL -->
+<div class="ov" id="ov-worker">
+<div class="modal modal-lg">
+  <div class="mh"><h3 id="wm-title">Dodaj pracownika</h3><button class="x-btn" onclick="closeModal('worker')">✕</button></div>
+  <div class="mb">
+    <div class="fg2">
+      <div class="flbl">📋 Dane podstawowe</div>
+      <div class="fg"><label>Imię <span class="req">*</span></label><input id="wm-fn" placeholder="Jan"></div>
+      <div class="fg"><label>Nazwisko <span class="req">*</span></label><input id="wm-ln" placeholder="Kowalski"></div>
+      <div class="fg"><label>Stanowisko <span class="req">*</span></label><input id="wm-pos" placeholder="Monter światłowodów"></div>
+      <div class="fg"><label>Dział</label><select id="wm-dept"><option>Techniczny</option><option>Administracja</option><option>Sprzedaż</option><option>Zarząd</option><option>Logistyka</option><option>Serwis</option><option>Inny</option></select></div>
+      <div class="fg"><label>Firma</label><select id="wm-co"><option value="">— wybierz —</option></select></div>
+      <div class="fg"><label>Status</label><select id="wm-status"><option>Aktywny</option><option>Urlop</option><option>Zwolnienie lekarskie</option><option>Nieaktywny</option></select></div>
+      <div class="fg"><label>Data zatrudnienia</label><input type="date" id="wm-hire"></div>
+      <div class="fg"><label>Typ umowy</label>
+        <select id="wm-contract" onchange="toggleContractEnd()">
+          <option>Umowa o pracę — czas nieokreślony</option>
+          <option>Umowa o pracę — czas określony</option>
+          <option>Umowa zlecenie</option><option>Umowa o dzieło</option><option>B2B</option>
+        </select>
+      </div>
+      <div class="fg" id="wm-contract-end-wrap" style="display:none"><label>Koniec umowy</label><input type="date" id="wm-contract-end"></div>
+      <div class="fg"><label>Data podpisania umowy</label><input type="date" id="wm-contract-sign"></div>
+      <div class="fsep"></div>
+      <div class="flbl">👤 Dane osobowe</div>
+      <div class="fg"><label>PESEL</label><input id="wm-pesel" placeholder="00000000000" maxlength="11"></div>
+      <div class="fg"><label>Seria i nr dowodu</label><input id="wm-idcard" placeholder="ABC 123456"></div>
+      <div class="fg"><label>Data urodzenia</label><input type="date" id="wm-birth"></div>
+      <div class="fg"><label>Miejsce urodzenia</label><input id="wm-birthplace" placeholder="Warszawa"></div>
+      <div class="fg s2"><label>Adres zamieszkania</label><input id="wm-addr" placeholder="ul. Kwiatowa 1/2"></div>
+      <div class="fg"><label>Miasto</label><input id="wm-city" placeholder="Warszawa"></div>
+      <div class="fg"><label>Kod pocztowy</label><input id="wm-zip" placeholder="00-000"></div>
+      <div class="fsep"></div>
+      <div class="flbl">📞 Kontakt</div>
+      <div class="fg"><label>Telefon</label><input id="wm-phone" placeholder="+48 600 000 000"></div>
+      <div class="fg"><label>Email</label><input type="email" id="wm-email" placeholder="jan@firma.pl"></div>
+      <div class="fg s2"><label>Kontakt alarmowy</label><input id="wm-emname" placeholder="Anna Kowalska — małżonek"></div>
+      <div class="fg"><label>Telefon alarmowy</label><input id="wm-emphone" placeholder="+48 600 000 001"></div>
+      <div class="fsep"></div>
+      <div class="flbl">🚗 Prawo jazdy</div>
+      <div class="fg s2">
+        <label>Kategorie (Ctrl = wiele)</label>
+        <select id="wm-lic" multiple size="4">
+          <option value="B">B — samochód osobowy</option>
+          <option value="BE">BE — samochód z przyczepą</option>
+          <option value="C">C — samochód ciężarowy</option>
+          <option value="CE">CE — ciężarowy z przyczepą</option>
+          <option value="C1">C1 — do 7,5t</option>
+          <option value="D">D — autobus</option>
+          <option value="D1">D1 — do 16 miejsc</option>
+          <option value="A">A — motocykl</option>
+          <option value="A2">A2 — motocykl do 35kW</option>
+          <option value="A1">A1 — motocykl do 125cc</option>
+          <option value="AM">AM — motorower</option>
+          <option value="T">T — ciągnik rolniczy</option>
+        </select>
+      </div>
+      <div class="fg"><label>Nr prawa jazdy</label><input id="wm-licnr" placeholder="XYZ 123456"></div>
+      <div class="fsep"></div>
+      <div class="flbl">🏗️ Uprawnienia UDT / Operatorskie</div>
+      <div class="fg s2">
+        <div class="chk-row">
+          <label class="chk-lbl"><input type="checkbox" id="op-koparka"> Koparka / koparka kołowa</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-ladowarka"> Ładowarka kołowa</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-dzwig"> Żuraw / dźwig</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-wozek"> Wózek widłowy (UDT)</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-podnosnik"> Podnośnik koszowy (UDT)</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-koparko"> Koparko-ładowarka</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-mini"> Miniładowarka / minikoparka</label>
+          <label class="chk-lbl"><input type="checkbox" id="op-suwnica"> Suwnica / cięgnik</label>
+        </div>
+      </div>
+      <div class="fg"><label>Nr uprawnień UDT</label><input id="wm-opnr" placeholder="UDT nr..."></div>
+      <div class="fg"><label>Ważność UDT</label><input type="date" id="wm-opvalid"></div>
+      <div class="fsep"></div>
+      <div class="flbl">⚡ Uprawnienia SEP</div>
+      <div class="fg s2">
+        <div class="chk-row">
+          <label class="chk-lbl"><input type="checkbox" id="sep-g1e"> G1 Eksploatacja (elektryczne)</label>
+          <label class="chk-lbl"><input type="checkbox" id="sep-g1d"> G1 Dozór (elektryczne)</label>
+          <label class="chk-lbl"><input type="checkbox" id="sep-g2e"> G2 Eksploatacja (cieplne)</label>
+          <label class="chk-lbl"><input type="checkbox" id="sep-g2d"> G2 Dozór (cieplne)</label>
+          <label class="chk-lbl"><input type="checkbox" id="sep-g3e"> G3 Eksploatacja (gazowe)</label>
+          <label class="chk-lbl"><input type="checkbox" id="sep-g3d"> G3 Dozór (gazowe)</label>
+          <label class="chk-lbl"><input type="checkbox" id="sep-pom"> Uprawnienia pomiarowe</label>
+        </div>
+      </div>
+      <div class="fg"><label>Nr świadectwa SEP</label><input id="wm-sepnr" placeholder="12345/E/2024"></div>
+      <div class="fg"><label>SEP ważne do</label><input type="date" id="wm-sepvalid"></div>
+      <div class="fsep"></div>
+      <div class="fg s2"><label>Uwagi</label><textarea id="wm-notes" placeholder="Dodatkowe informacje..."></textarea></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-s" onclick="closeModal('worker')">Anuluj</button>
+    <button class="btn btn-p" onclick="saveWorker()">💾 Zapisz pracownika</button>
+  </div>
+</div>
+</div>
+
+<!-- EQUIPMENT MODAL -->
+<div class="ov" id="ov-equipment">
+<div class="modal">
+  <div class="mh"><h3 id="em-title">Dodaj wyposażenie</h3><button class="x-btn" onclick="closeModal('equipment')">✕</button></div>
+  <div class="mb">
+    <div class="fg2">
+      <div class="fg s2"><label>Nazwa <span class="req">*</span></label><input id="em-name" placeholder="np. Spawarka Fujikura 62S+"></div>
+      <div class="fg"><label>Kategoria</label><select id="em-cat"><option>Narzędzia ręczne</option><option>Sprzęt pomiarowy</option><option>Sprzęt spawalniczy</option><option>Elektronika</option><option>Odzież robocza</option><option>Telefon/Tablet</option><option>Laptop/Komputer</option><option>Środki ochrony</option><option>Inne</option></select></div>
+      <div class="fg"><label>Nr seryjny</label><input id="em-serial" placeholder="SN-000000"></div>
+      <div class="fg"><label>Przypisany do</label><select id="em-worker"><option value="">— brak —</option></select></div>
+      <div class="fg"><label>Data zakupu</label><input type="date" id="em-buy"></div>
+      <div class="fg"><label>Wartość (PLN)</label><input type="number" id="em-val" placeholder="0.00"></div>
+      <div class="fg"><label>Gwarancja do</label><input type="date" id="em-warranty"></div>
+      <div class="fg"><label>Stan</label><select id="em-cond"><option>Nowy</option><option>Dobry</option><option>Używany</option><option>Do naprawy</option></select></div>
+      <div class="fg s2"><label>Uwagi</label><textarea id="em-notes"></textarea></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-s" onclick="closeModal('equipment')">Anuluj</button>
+    <button class="btn btn-p" onclick="saveEquipment()">💾 Zapisz</button>
+  </div>
+</div>
+</div>
+
+<!-- MEDICAL MODAL -->
+<div class="ov" id="ov-medical">
+<div class="modal">
+  <div class="mh"><h3>Dodaj badanie lekarskie</h3><button class="x-btn" onclick="closeModal('medical')">✕</button></div>
+  <div class="mb">
+    <div class="fg2">
+      <div class="fg s2"><label>Pracownik <span class="req">*</span></label><select id="mm-worker"><option value="">— wybierz —</option></select></div>
+      <div class="fg"><label>Typ badania</label><select id="mm-type"><option>Wstępne</option><option>Okresowe</option><option>Kontrolne</option><option>Specjalistyczne</option></select></div>
+      <div class="fg"><label>Placówka</label><input id="mm-clinic" placeholder="Centrum Medyczne..."></div>
+      <div class="fg"><label>Data badania <span class="req">*</span></label><input type="date" id="mm-date"></div>
+      <div class="fg"><label>Ważne do <span class="req">*</span></label><input type="date" id="mm-valid"></div>
+      <div class="fg s2"><label>Uwagi</label><textarea id="mm-notes" placeholder="Zdolny do pracy..."></textarea></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-s" onclick="closeModal('medical')">Anuluj</button>
+    <button class="btn btn-p" onclick="saveMedical()">💾 Zapisz</button>
+  </div>
+</div>
+</div>
+
+<!-- VEHICLE MODAL -->
+<div class="ov" id="ov-vehicle">
+<div class="modal modal-lg">
+  <div class="mh"><h3 id="vm-title">Dodaj pojazd</h3><button class="x-btn" onclick="closeModal('vehicle')">✕</button></div>
+  <div class="mb">
+    <div class="fg2">
+      <div class="flbl">🚗 Dane pojazdu</div>
+      <div class="fg"><label>Marka <span class="req">*</span></label><input id="vm-brand" placeholder="Toyota"></div>
+      <div class="fg"><label>Model <span class="req">*</span></label><input id="vm-model" placeholder="HiLux"></div>
+      <div class="fg"><label>Nr rejestracyjny <span class="req">*</span></label><input id="vm-plate" placeholder="WA 12345"></div>
+      <div class="fg"><label>Rok produkcji</label><input type="number" id="vm-year" placeholder="2022"></div>
+      <div class="fg"><label>VIN</label><input id="vm-vin" placeholder="VIN..."></div>
+      <div class="fg"><label>Przebieg (km)</label><input type="number" id="vm-mileage" placeholder="0"></div>
+      <div class="fg"><label>Firma</label><select id="vm-co"><option value="">— wybierz —</option></select></div>
+      <div class="fg"><label>Kierowca</label><select id="vm-driver"><option value="">— brak —</option></select></div>
+      <div class="fsep"></div>
+      <div class="flbl">📅 Terminy</div>
+      <div class="fg"><label>Przegląd techniczny do <span class="req">*</span></label><input type="date" id="vm-insp"></div>
+      <div class="fg"><label>Ubezpieczenie OC do <span class="req">*</span></label><input type="date" id="vm-oc"></div>
+      <div class="fg"><label>Ubezpieczenie AC do</label><input type="date" id="vm-ac"></div>
+      <div class="fg"><label>Następny serwis</label><input type="date" id="vm-service"></div>
+      <div class="fg s2"><label>Uwagi</label><textarea id="vm-notes"></textarea></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-s" onclick="closeModal('vehicle')">Anuluj</button>
+    <button class="btn btn-p" onclick="saveVehicle()">💾 Zapisz pojazd</button>
+  </div>
+</div>
+</div>
+
+<!-- ASSET MODAL -->
+<div class="ov" id="ov-asset">
+<div class="modal">
+  <div class="mh"><h3>Dodaj aktywo firmowe</h3><button class="x-btn" onclick="closeModal('asset')">✕</button></div>
+  <div class="mb">
+    <div class="fg2">
+      <div class="fg s2"><label>Nazwa <span class="req">*</span></label><input id="am-name" placeholder="np. Serwer Dell PowerEdge"></div>
+      <div class="fg"><label>Kategoria</label><select id="am-cat"><option>Sprzęt IT</option><option>Maszyny i urządzenia</option><option>Meble biurowe</option><option>Nieruchomości</option><option>Środki transportu</option><option>Licencje</option><option>Inne</option></select></div>
+      <div class="fg"><label>Nr inwentarzowy</label><input id="am-inv" placeholder="INW/2025/001"></div>
+      <div class="fg"><label>Firma</label><select id="am-co"><option value="">— wybierz —</option></select></div>
+      <div class="fg"><label>Lokalizacja</label><input id="am-loc" placeholder="Biuro Warszawa"></div>
+      <div class="fg"><label>Odpowiedzialny</label><select id="am-resp"><option value="">— brak —</option></select></div>
+      <div class="fg"><label>Data zakupu</label><input type="date" id="am-buy"></div>
+      <div class="fg"><label>Wartość (PLN)</label><input type="number" id="am-val" placeholder="0.00"></div>
+      <div class="fg"><label>Stan</label><select id="am-cond"><option>Nowy</option><option>Dobry</option><option>Używany</option><option>Do naprawy</option><option>Wycofany</option></select></div>
+      <div class="fg s2"><label>Uwagi</label><textarea id="am-notes"></textarea></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-s" onclick="closeModal('asset')">Anuluj</button>
+    <button class="btn btn-p" onclick="saveAsset()">💾 Zapisz</button>
+  </div>
+</div>
+</div>
+
+<!-- COMPANY MODAL -->
+<div class="ov" id="ov-company">
+<div class="modal" style="width:520px">
+  <div class="mh"><h3 id="cm-title">Dodaj firmę</h3><button class="x-btn" onclick="closeModal('company')">✕</button></div>
+  <div class="mb">
+    <div class="fg2">
+      <div class="fg s2"><label>Nazwa firmy <span class="req">*</span></label><input id="cm-name" placeholder="Sp. z o.o. / S.A. ..."></div>
+      <div class="fg"><label>NIP</label><input id="cm-nip" placeholder="000-000-00-00"></div>
+      <div class="fg"><label>REGON</label><input id="cm-regon" placeholder="000000000"></div>
+      <div class="fg s2"><label>Adres siedziby</label><input id="cm-addr" placeholder="ul. Przykładowa 1, 00-000 Warszawa"></div>
+      <div class="fg"><label>Telefon</label><input id="cm-phone" placeholder="+48 22 000 00 00"></div>
+      <div class="fg"><label>Email</label><input id="cm-email" placeholder="biuro@firma.pl"></div>
+      <div class="fg"><label>Ikona (emoji)</label><input id="cm-icon" placeholder="🏗️" style="font-size:18px;width:80px"></div>
+    </div>
+  </div>
+  <div class="mf">
+    <button class="btn btn-s" onclick="closeModal('company')">Anuluj</button>
+    <button class="btn btn-p" onclick="saveCompany()">💾 Zapisz firmę</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SUPABASE
+// ============================================================
+const SB_URL = 'https://qzmzxujciekbitfwxqlc.supabase.co';
+const SB_KEY = 'sb_publishable_54ec62YhuvvEyxk0xcNqYA_w2Qkde6I';
+
+async function sbReq(method, table, body, filter) {
+  filter = filter || '';
+  var url = SB_URL + '/rest/v1/' + table + filter;
+  var headers = {
+    'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + SB_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': (method === 'POST' || method === 'PATCH') ? 'return=representation' : ''
+  };
+  var opts = { method: method, headers: headers };
+  if (body) opts.body = JSON.stringify(body);
+  var res = await fetch(url, opts);
+  if (res.status === 204) return [];
+  var text = await res.text();
+  var data;
+  try { data = JSON.parse(text); } catch(e) { data = text; }
+  if (!res.ok) {
+    var msg = typeof data === 'object' ? JSON.stringify(data) : text;
+    console.error('Supabase error:', res.status, msg);
+    throw new Error('Status ' + res.status + ': ' + msg);
+  }
+  return data;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+var DB = { companies: [], workers: [], equipment: [], medical: [], vehicles: [], assets: [] };
+var EDIT = {};
+var CUR_WORKER = null;
+var ACTIVE_CO = '';
+
+// ============================================================
+// LOADER
+// ============================================================
+function showLoad(msg) {
+  document.getElementById('loader').classList.add('show');
+  document.getElementById('loader-txt').textContent = msg || 'Ładowanie...';
+}
+function hideLoad() { document.getElementById('loader').classList.remove('show'); }
+
+// ============================================================
+// LOAD DATA FROM SUPABASE
+// ============================================================
+async function loadDB() {
+  showLoad('Łączenie z bazą danych...');
+  try {
+    var results = await Promise.all([
+      sbReq('GET', 'companies', null, '?order=created_at'),
+      sbReq('GET', 'workers', null, '?order=created_at'),
+      sbReq('GET', 'equipment', null, '?order=created_at'),
+      sbReq('GET', 'medical', null, '?order=created_at'),
+      sbReq('GET', 'vehicles', null, '?order=created_at'),
+      sbReq('GET', 'assets', null, '?order=created_at')
+    ]);
+    DB.companies = results[0];
+    DB.workers   = results[1].map(mapW);
+    DB.equipment = results[2].map(mapE);
+    DB.medical   = results[3].map(mapM);
+    DB.vehicles  = results[4].map(mapV);
+    DB.assets    = results[5].map(mapA);
+    toast('Dane załadowane ✓');
+  } catch(e) {
+    toast('Błąd połączenia z Supabase! Sprawdź schemat SQL.', 'err');
+    console.error(e);
+  }
+  hideLoad();
+}
+
+function mapW(r) {
+  return {
+    id: r.id, companyId: r.company_id, firstname: r.firstname, lastname: r.lastname,
+    position: r.position, dept: r.dept, status: r.status, hireDate: r.hire_date,
+    contract: r.contract, contractEnd: r.contract_end, contractSign: r.contract_sign,
+    pesel: r.pesel, idCard: r.id_card, birthDate: r.birth_date, birthPlace: r.birth_place,
+    address: r.address, city: r.city, zip: r.zip, phone: r.phone, email: r.email,
+    emergencyName: r.emergency_name, emergencyPhone: r.emergency_phone,
+    notes: r.notes,
+    licenseCategories: r.license_categories || [],
+    licenseNr: r.license_nr,
+    operators: r.operators || {},
+    operatorNr: r.operator_nr, operatorValid: r.operator_valid,
+    sep: r.sep || {}, sepNr: r.sep_nr, sepValid: r.sep_valid
+  };
+}
+function mapE(r) {
+  return { id: r.id, workerId: r.worker_id, name: r.name, category: r.category,
+    serial: r.serial, buyDate: r.buy_date, value: r.value, warranty: r.warranty,
+    condition: r.condition, notes: r.notes };
+}
+function mapM(r) {
+  return { id: r.id, workerId: r.worker_id, type: r.type, clinic: r.clinic,
+    date: r.date, validTo: r.valid_to, notes: r.notes };
+}
+function mapV(r) {
+  return { id: r.id, companyId: r.company_id, driverId: r.driver_id, brand: r.brand,
+    model: r.model, plate: r.plate, year: r.year, vin: r.vin, mileage: r.mileage,
+    inspection: r.inspection, insuranceOC: r.insurance_oc, insuranceAC: r.insurance_ac,
+    service: r.service, notes: r.notes };
+}
+function mapA(r) {
+  return { id: r.id, companyId: r.company_id, responsibleId: r.responsible_id,
+    name: r.name, category: r.category, invNum: r.inv_num, location: r.location,
+    buyDate: r.buy_date, value: r.value, condition: r.condition, notes: r.notes };
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function navTo(page) {
+  document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('active'); });
+  var el = document.getElementById('pg-' + page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.ni').forEach(function(n) { n.classList.remove('active'); });
+  var nav = document.querySelector('.ni[data-page="' + page + '"]');
+  if (nav) nav.classList.add('active');
+  renderPage(page);
+}
+
+function renderPage(page) {
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'workers') renderWorkers();
+  else if (page === 'equipment') renderEquipment();
+  else if (page === 'medical-list') renderMedicalList();
+  else if (page === 'medical-tiles') renderMedTiles();
+  else if (page === 'uprawnienia') renderUprawnienia();
+  else if (page === 'vehicles') renderVehicles();
+  else if (page === 'assets') renderAssets();
+  else if (page === 'settings') renderSettings();
+  else if (page === 'documents') populateDocWorkers();
+  updateSelects();
+}
+
+function renderAll() {
+  var active = document.querySelector('.pg.active');
+  var page = active ? active.id.replace('pg-', '') : 'dashboard';
+  renderPage(page);
+  updateBadges();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function sv(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; }
+function gc(id) { var el = document.getElementById(id); return el ? el.checked : false; }
+function sc(id, val) { var el = document.getElementById(id); if (el) el.checked = !!val; }
+
+function daysLeft(d) {
+  if (!d) return 9999;
+  var t = new Date(); t.setHours(0,0,0,0);
+  var dt = new Date(d); dt.setHours(0,0,0,0);
+  return Math.floor((dt - t) / 86400000);
+}
+function fmtDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('pl-PL'); }
+function fmtMoney(v) { if (!v && v !== 0) return '—'; return parseFloat(v).toLocaleString('pl-PL', {minimumFractionDigits: 2}) + ' PLN'; }
+function avColor(s) {
+  var cols = ['#3d7fff','#00e5a0','#ffb020','#ff4d6d','#b48aff','#22d3ee','#f97316'];
+  var h = 0;
+  for (var i = 0; i < s.length; i++) h = s.charCodeAt(i) + ((h << 5) - h);
+  return cols[Math.abs(h) % cols.length];
+}
+function wName(id) { var w = DB.workers.find(function(x) { return x.id === id; }); return w ? w.firstname + ' ' + w.lastname : '—'; }
+function coName(id) { var c = DB.companies.find(function(x) { return x.id === id; }); return c ? c.name : '—'; }
+
+function statusBadge(days) {
+  if (days === 9999) return '<span class="bdg bgr">Brak daty</span>';
+  if (days < 0) return '<span class="bdg br">🔴 Przeterminowane</span>';
+  if (days <= 14) return '<span class="bdg br">🔴 Pilne</span>';
+  if (days <= 30) return '<span class="bdg by">🟡 Wkrótce</span>';
+  return '<span class="bdg bg">🟢 OK</span>';
+}
+function daysBadge(days) {
+  if (days === 9999) return '';
+  var col = days < 0 ? 'color:var(--red)' : days <= 30 ? 'color:var(--org)' : 'color:var(--txt2)';
+  var txt = days < 0 ? (Math.abs(days) + 'd temu') : (days + 'd');
+  return '<span class="mono" style="' + col + '">' + txt + '</span>';
+}
+
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = (type === 'err' ? '✗ ' : '✓ ') + msg;
+  el.className = 'toast show ' + (type === 'err' ? 'err' : 'ok');
+  setTimeout(function() { el.classList.remove('show'); }, 3200);
+}
+
+function emptyRow(cols, icon, msg) {
+  return '<tr><td colspan="' + cols + '"><div style="text-align:center;padding:40px;color:var(--txt3)">' + icon + ' ' + msg + '</div></td></tr>';
+}
+
+function updateBadges() {
+  var medW = DB.medical.filter(function(m) { return daysLeft(m.validTo) <= 30; }).length;
+  var vehW = DB.vehicles.filter(function(v) { return Math.min(daysLeft(v.inspection), daysLeft(v.insuranceOC)) <= 30; }).length;
+  var sepW = DB.workers.filter(function(w) { return w.sepValid && daysLeft(w.sepValid) <= 30; }).length;
+  var bm = document.getElementById('bdg-med'); if (bm) { bm.textContent = medW; bm.style.display = medW ? '' : 'none'; }
+  var bv = document.getElementById('bdg-veh'); if (bv) { bv.textContent = vehW; bv.style.display = vehW ? '' : 'none'; }
+  var bs = document.getElementById('bdg-sep'); if (bs) { bs.textContent = sepW; bs.style.display = sepW ? '' : 'none'; }
+}
+
+function updateSelects() {
+  // Company filters
+  var cIds = ['dash-cf','wf-co','vf-co','af-co','mt-co','uf-co','active-co'];
+  cIds.forEach(function(id) {
+    var sel = document.getElementById(id); if (!sel) return;
+    var cur = sel.value;
+    var first = id === 'active-co' ? '<option value="">— wszystkie —</option>' : '<option value="">Wszystkie firmy</option>';
+    sel.innerHTML = first;
+    DB.companies.forEach(function(c) {
+      sel.innerHTML += '<option value="' + c.id + '">' + (c.icon || '🏢') + ' ' + c.name + '</option>';
+    });
+    sel.value = cur;
+  });
+  // Worker selects in modals
+  ['em-worker','mm-worker','vm-driver','am-resp','doc-w'].forEach(function(id) {
+    var sel = document.getElementById(id); if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">— brak —</option>';
+    DB.workers.forEach(function(w) {
+      sel.innerHTML += '<option value="' + w.id + '">' + w.firstname + ' ' + w.lastname + '</option>';
+    });
+    sel.value = cur;
+  });
+  // Company selects in modals
+  ['wm-co','vm-co','am-co'].forEach(function(id) {
+    var sel = document.getElementById(id); if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">— wybierz —</option>';
+    DB.companies.forEach(function(c) {
+      sel.innerHTML += '<option value="' + c.id + '">' + (c.icon || '🏢') + ' ' + c.name + '</option>';
+    });
+    sel.value = cur;
+  });
+  // Dept filter
+  var dSel = document.getElementById('wf-dept');
+  if (dSel) {
+    var curD = dSel.value;
+    var depts = DB.workers.map(function(w) { return w.dept; }).filter(function(d, i, a) { return d && a.indexOf(d) === i; });
+    dSel.innerHTML = '<option value="">Wszystkie działy</option>';
+    depts.forEach(function(d) { dSel.innerHTML += '<option>' + d + '</option>'; });
+    dSel.value = curD;
+  }
+  // Equipment category filter
+  var ecSel = document.getElementById('ef-cat');
+  if (ecSel) {
+    var curC = ecSel.value;
+    var cats = DB.equipment.map(function(e) { return e.category; }).filter(function(c, i, a) { return c && a.indexOf(c) === i; });
+    ecSel.innerHTML = '<option value="">Wszystkie kategorie</option>';
+    cats.forEach(function(c) { ecSel.innerHTML += '<option>' + c + '</option>'; });
+    ecSel.value = curC;
+  }
+  // Equipment worker filter
+  var ewSel = document.getElementById('ef-w');
+  if (ewSel) {
+    var curW = ewSel.value;
+    ewSel.innerHTML = '<option value="">Wszyscy pracownicy</option>';
+    DB.workers.forEach(function(w) { ewSel.innerHTML += '<option value="' + w.id + '">' + w.firstname + ' ' + w.lastname + '</option>'; });
+    ewSel.value = curW;
+  }
+  // Active company select
+  var acSel = document.getElementById('active-co');
+  if (acSel) acSel.value = ACTIVE_CO;
+  // Sidebar company name
+  var co = DB.companies.find(function(c) { return c.id === ACTIVE_CO; });
+  var sbName = document.getElementById('sb-co-name');
+  if (sbName) sbName.textContent = co ? co.name : (DB.companies.length ? 'Wszystkie firmy' : 'Dodaj firmę →');
+}
+
+function setActiveCo(id) {
+  ACTIVE_CO = id;
+  localStorage.setItem('dd_active_co', id);
+  updateSelects();
+  renderDashboard();
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(type) { document.getElementById('ov-' + type).classList.add('open'); }
+function closeModal(type) { document.getElementById('ov-' + type).classList.remove('open'); EDIT[type] = null; }
+
+function openWModal(id) {
+  EDIT.worker = id || null;
+  document.getElementById('wm-title').textContent = id ? '✏️ Edytuj pracownika' : '➕ Dodaj pracownika';
+  updateSelects();
+  if (id) {
+    var w = DB.workers.find(function(x) { return x.id === id; });
+    if (w) fillWForm(w);
+  } else {
+    clearWForm();
+  }
+  openModal('worker');
+}
+
+function clearWForm() {
+  ['wm-fn','wm-ln','wm-pos','wm-phone','wm-email','wm-pesel','wm-idcard','wm-birth','wm-birthplace','wm-addr','wm-city','wm-zip','wm-hire','wm-contract-end','wm-contract-sign','wm-emname','wm-emphone','wm-licnr','wm-opnr','wm-opvalid','wm-sepnr','wm-sepvalid','wm-notes'].forEach(function(id) { sv(id, ''); });
+  ['op-koparka','op-ladowarka','op-dzwig','op-wozek','op-podnosnik','op-koparko','op-mini','op-suwnica','sep-g1e','sep-g1d','sep-g2e','sep-g2d','sep-g3e','sep-g3d','sep-pom'].forEach(function(id) { sc(id, false); });
+  var lic = document.getElementById('wm-lic');
+  if (lic) Array.from(lic.options).forEach(function(o) { o.selected = false; });
+  document.getElementById('wm-contract-end-wrap').style.display = 'none';
+}
+
+function fillWForm(w) {
+  sv('wm-fn', w.firstname); sv('wm-ln', w.lastname); sv('wm-pos', w.position);
+  sv('wm-dept', w.dept); sv('wm-co', w.companyId); sv('wm-status', w.status);
+  sv('wm-hire', w.hireDate); sv('wm-contract', w.contract);
+  sv('wm-contract-end', w.contractEnd); sv('wm-contract-sign', w.contractSign);
+  sv('wm-pesel', w.pesel); sv('wm-idcard', w.idCard);
+  sv('wm-birth', w.birthDate); sv('wm-birthplace', w.birthPlace);
+  sv('wm-addr', w.address); sv('wm-city', w.city); sv('wm-zip', w.zip);
+  sv('wm-phone', w.phone); sv('wm-email', w.email);
+  sv('wm-emname', w.emergencyName); sv('wm-emphone', w.emergencyPhone);
+  sv('wm-licnr', w.licenseNr);
+  var lic = document.getElementById('wm-lic');
+  if (lic) Array.from(lic.options).forEach(function(o) { o.selected = (w.licenseCategories || []).indexOf(o.value) >= 0; });
+  var ops = w.operators || {};
+  sc('op-koparka', ops.koparka); sc('op-ladowarka', ops.ladowarka); sc('op-dzwig', ops.dzwig);
+  sc('op-wozek', ops.wozek); sc('op-podnosnik', ops.podnosnik); sc('op-koparko', ops.koparko);
+  sc('op-mini', ops.mini); sc('op-suwnica', ops.suwnica);
+  sv('wm-opnr', w.operatorNr); sv('wm-opvalid', w.operatorValid);
+  var sep = w.sep || {};
+  sc('sep-g1e', sep.g1e); sc('sep-g1d', sep.g1d); sc('sep-g2e', sep.g2e);
+  sc('sep-g2d', sep.g2d); sc('sep-g3e', sep.g3e); sc('sep-g3d', sep.g3d); sc('sep-pom', sep.pom);
+  sv('wm-sepnr', w.sepNr); sv('wm-sepvalid', w.sepValid);
+  sv('wm-notes', w.notes);
+  toggleContractEnd();
+}
+
+function toggleContractEnd() {
+  var sel = document.getElementById('wm-contract');
+  var wrap = document.getElementById('wm-contract-end-wrap');
+  if (sel && wrap) wrap.style.display = sel.value.indexOf('określony') >= 0 ? '' : 'none';
+}
+
+function openEModal(id) {
+  EDIT.equipment = id || null;
+  document.getElementById('em-title').textContent = id ? '✏️ Edytuj wyposażenie' : '➕ Dodaj wyposażenie';
+  updateSelects();
+  if (id) {
+    var e = DB.equipment.find(function(x) { return x.id === id; });
+    if (e) { sv('em-name',e.name); sv('em-cat',e.category); sv('em-serial',e.serial); sv('em-worker',e.workerId); sv('em-buy',e.buyDate); sv('em-val',e.value); sv('em-warranty',e.warranty); sv('em-cond',e.condition); sv('em-notes',e.notes); }
+  } else {
+    ['em-name','em-serial','em-buy','em-val','em-warranty','em-notes'].forEach(function(i) { sv(i,''); });
+    if (CUR_WORKER) sv('em-worker', CUR_WORKER);
+  }
+  openModal('equipment');
+}
+
+function openMModal(id, wid) {
+  EDIT.medical = id || null;
+  updateSelects();
+  if (id) {
+    var m = DB.medical.find(function(x) { return x.id === id; });
+    if (m) { sv('mm-worker',m.workerId); sv('mm-type',m.type); sv('mm-clinic',m.clinic); sv('mm-date',m.date); sv('mm-valid',m.validTo); sv('mm-notes',m.notes); }
+  } else {
+    ['mm-clinic','mm-date','mm-valid','mm-notes'].forEach(function(i) { sv(i,''); });
+    if (wid) sv('mm-worker', wid);
+    else if (CUR_WORKER) sv('mm-worker', CUR_WORKER);
+  }
+  openModal('medical');
+}
+
+function openVModal(id) {
+  EDIT.vehicle = id || null;
+  document.getElementById('vm-title').textContent = id ? '✏️ Edytuj pojazd' : '➕ Dodaj pojazd';
+  updateSelects();
+  if (id) {
+    var v = DB.vehicles.find(function(x) { return x.id === id; });
+    if (v) { sv('vm-brand',v.brand); sv('vm-model',v.model); sv('vm-plate',v.plate); sv('vm-year',v.year); sv('vm-vin',v.vin); sv('vm-mileage',v.mileage); sv('vm-co',v.companyId); sv('vm-driver',v.driverId); sv('vm-insp',v.inspection); sv('vm-oc',v.insuranceOC); sv('vm-ac',v.insuranceAC); sv('vm-service',v.service); sv('vm-notes',v.notes); }
+  } else {
+    ['vm-brand','vm-model','vm-plate','vm-year','vm-vin','vm-mileage','vm-insp','vm-oc','vm-ac','vm-service','vm-notes'].forEach(function(i) { sv(i,''); });
+  }
+  openModal('vehicle');
+}
+
+function openAModal(id) {
+  EDIT.asset = id || null;
+  updateSelects();
+  if (id) {
+    var a = DB.assets.find(function(x) { return x.id === id; });
+    if (a) { sv('am-name',a.name); sv('am-cat',a.category); sv('am-inv',a.invNum); sv('am-co',a.companyId); sv('am-loc',a.location); sv('am-resp',a.responsibleId); sv('am-buy',a.buyDate); sv('am-val',a.value); sv('am-cond',a.condition); sv('am-notes',a.notes); }
+  } else {
+    ['am-name','am-inv','am-loc','am-buy','am-val','am-notes'].forEach(function(i) { sv(i,''); });
+  }
+  openModal('asset');
+}
+
+function openCoModal(id) {
+  EDIT.company = id || null;
+  document.getElementById('cm-title').textContent = id ? '✏️ Edytuj firmę' : '➕ Dodaj firmę';
+  if (id) {
+    var c = DB.companies.find(function(x) { return x.id === id; });
+    if (c) { sv('cm-name',c.name); sv('cm-nip',c.nip); sv('cm-regon',c.regon); sv('cm-addr',c.address); sv('cm-phone',c.phone); sv('cm-email',c.email); sv('cm-icon',c.icon); }
+  } else {
+    ['cm-name','cm-nip','cm-regon','cm-addr','cm-phone','cm-email','cm-icon'].forEach(function(i) { sv(i,''); });
+  }
+  openModal('company');
+}
+
+// Close overlay on background click
+document.querySelectorAll('.ov').forEach(function(ov) {
+  ov.addEventListener('click', function(e) {
+    if (e.target === ov) {
+      var type = ov.id.replace('ov-', '');
+      closeModal(type);
+    }
+  });
+});
+
+// ============================================================
+// SAVE FUNCTIONS
+// ============================================================
+async function saveWorker() {
+  var fn = gv('wm-fn'), ln = gv('wm-ln'), pos = gv('wm-pos');
+  if (!fn || !ln || !pos) { toast('Wypełnij wymagane pola!', 'err'); return; }
+  var licSel = document.getElementById('wm-lic');
+  var lics = licSel ? Array.from(licSel.selectedOptions).map(function(o) { return o.value; }) : [];
+  var dbObj = {
+    firstname: fn, lastname: ln, position: pos,
+    dept: gv('wm-dept') || null, company_id: gv('wm-co') || null, status: gv('wm-status'),
+    hire_date: gv('wm-hire') || null, contract: gv('wm-contract') || null,
+    contract_end: gv('wm-contract-end') || null, contract_sign: gv('wm-contract-sign') || null,
+    pesel: gv('wm-pesel') || null, id_card: gv('wm-idcard') || null,
+    birth_date: gv('wm-birth') || null, birth_place: gv('wm-birthplace') || null,
+    address: gv('wm-addr') || null, city: gv('wm-city') || null, zip: gv('wm-zip') || null,
+    phone: gv('wm-phone') || null, email: gv('wm-email') || null,
+    emergency_name: gv('wm-emname') || null, emergency_phone: gv('wm-emphone') || null,
+    notes: gv('wm-notes') || null,
+    license_categories: lics, license_nr: gv('wm-licnr') || null,
+    operators: { koparka: gc('op-koparka'), ladowarka: gc('op-ladowarka'), dzwig: gc('op-dzwig'), wozek: gc('op-wozek'), podnosnik: gc('op-podnosnik'), koparko: gc('op-koparko'), mini: gc('op-mini'), suwnica: gc('op-suwnica') },
+    operator_nr: gv('wm-opnr') || null, operator_valid: gv('wm-opvalid') || null,
+    sep: { g1e: gc('sep-g1e'), g1d: gc('sep-g1d'), g2e: gc('sep-g2e'), g2d: gc('sep-g2d'), g3e: gc('sep-g3e'), g3d: gc('sep-g3d'), pom: gc('sep-pom') },
+    sep_nr: gv('wm-sepnr') || null, sep_valid: gv('wm-sepvalid') || null
+  };
+  try {
+    showLoad('Zapisywanie...');
+    var res;
+    if (EDIT.worker) {
+      res = await sbReq('PATCH', 'workers', dbObj, '?id=eq.' + EDIT.worker);
+      DB.workers = DB.workers.map(function(x) { return x.id === EDIT.worker ? mapW(res[0]) : x; });
+    } else {
+      res = await sbReq('POST', 'workers', dbObj, '');
+      DB.workers.push(mapW(res[0]));
+    }
+    hideLoad(); closeModal('worker'); renderAll(); toast('Pracownik zapisany');
+  } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
+}
+
+async function saveEquipment() {
+  var name = gv('em-name'); if (!name) { toast('Podaj nazwę', 'err'); return; }
+  var dbObj = { name: name, category: gv('em-cat') || null, serial: gv('em-serial') || null, worker_id: gv('em-worker') || null, buy_date: gv('em-buy') || null, value: gv('em-val') || null, warranty: gv('em-warranty') || null, condition: gv('em-cond'), notes: gv('em-notes') || null };
+  try {
+    showLoad('Zapisywanie...');
+    var res;
+    if (EDIT.equipment) {
+      res = await sbReq('PATCH', 'equipment', dbObj, '?id=eq.' + EDIT.equipment);
+      DB.equipment = DB.equipment.map(function(x) { return x.id === EDIT.equipment ? mapE(res[0]) : x; });
+    } else {
+      res = await sbReq('POST', 'equipment', dbObj, '');
+      DB.equipment.push(mapE(res[0]));
+    }
+    hideLoad(); closeModal('equipment'); renderAll(); toast('Wyposażenie zapisane');
+  } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
+}
+
+async function saveMedical() {
+  var wid = gv('mm-worker'), date = gv('mm-date'), valid = gv('mm-valid');
+  if (!wid || !date || !valid) { toast('Wypełnij wymagane pola', 'err'); return; }
+  var dbObj = { worker_id: wid, type: gv('mm-type'), clinic: gv('mm-clinic') || null, date: date, valid_to: valid, notes: gv('mm-notes') || null };
+  try {
+    showLoad('Zapisywanie...');
+    var res;
+    if (EDIT.medical) {
+      res = await sbReq('PATCH', 'medical', dbObj, '?id=eq.' + EDIT.medical);
+      DB.medical = DB.medical.map(function(x) { return x.id === EDIT.medical ? mapM(res[0]) : x; });
+    } else {
+      res = await sbReq('POST', 'medical', dbObj, '');
+      DB.medical.push(mapM(res[0]));
+    }
+    hideLoad(); closeModal('medical'); renderAll(); toast('Badanie zapisane');
+    if (CUR_WORKER) renderWMedList(CUR_WORKER);
+  } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
+}
+
+async function saveVehicle() {
+  var brand = gv('vm-brand'), model = gv('vm-model'), plate = gv('vm-plate');
+  if (!brand || !model || !plate) { toast('Wypełnij wymagane pola', 'err'); return; }
+  var dbObj = { brand: brand, model: model, plate: plate.toUpperCase(), year: gv('vm-year') || null, vin: gv('vm-vin') || null, mileage: gv('vm-mileage') || null, company_id: gv('vm-co') || null, driver_id: gv('vm-driver') || null, inspection: gv('vm-insp') || null, insurance_oc: gv('vm-oc') || null, insurance_ac: gv('vm-ac') || null, service: gv('vm-service') || null, notes: gv('vm-notes') || null };
+  try {
+    showLoad('Zapisywanie...');
+    var res;
+    if (EDIT.vehicle) {
+      res = await sbReq('PATCH', 'vehicles', dbObj, '?id=eq.' + EDIT.vehicle);
+      DB.vehicles = DB.vehicles.map(function(x) { return x.id === EDIT.vehicle ? mapV(res[0]) : x; });
+    } else {
+      res = await sbReq('POST', 'vehicles', dbObj, '');
+      DB.vehicles.push(mapV(res[0]));
+    }
+    hideLoad(); closeModal('vehicle'); renderAll(); toast('Pojazd zapisany');
+  } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
+}
+
+async function saveAsset() {
+  var name = gv('am-name'); if (!name) { toast('Podaj nazwę', 'err'); return; }
+  var dbObj = { name: name, category: gv('am-cat') || null, inv_num: gv('am-inv') || null, company_id: gv('am-co') || null, location: gv('am-loc') || null, responsible_id: gv('am-resp') || null, buy_date: gv('am-buy') || null, value: gv('am-val') || null, condition: gv('am-cond'), notes: gv('am-notes') || null };
+  try {
+    showLoad('Zapisywanie...');
+    var res;
+    if (EDIT.asset) {
+      res = await sbReq('PATCH', 'assets', dbObj, '?id=eq.' + EDIT.asset);
+      DB.assets = DB.assets.map(function(x) { return x.id === EDIT.asset ? mapA(res[0]) : x; });
+    } else {
+      res = await sbReq('POST', 'assets', dbObj, '');
+      DB.assets.push(mapA(res[0]));
+    }
+    hideLoad(); closeModal('asset'); renderAll(); toast('Aktywo zapisane');
+  } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
+}
+
+async function saveCompany() {
+  var name = gv('cm-name'); if (!name) { toast('Podaj nazwę firmy', 'err'); return; }
+  var dbObj = { name: name, nip: gv('cm-nip') || null, regon: gv('cm-regon') || null, address: gv('cm-addr') || null, phone: gv('cm-phone') || null, email: gv('cm-email') || null, icon: gv('cm-icon') || '🏢' };
+  try {
+    showLoad('Zapisywanie...');
+    var res;
+    if (EDIT.company) {
+      res = await sbReq('PATCH', 'companies', dbObj, '?id=eq.' + EDIT.company);
+      DB.companies = DB.companies.map(function(x) { return x.id === EDIT.company ? res[0] : x; });
+    } else {
+      res = await sbReq('POST', 'companies', dbObj, '');
+      DB.companies.push(res[0]);
+    }
+    hideLoad(); closeModal('company'); renderAll(); toast('Firma zapisana');
+  } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
+}
+
+async function delItem(col, id) {
+  if (!confirm('Usunąć ten wpis?')) return;
+  var tableMap = { companies: 'companies', workers: 'workers', equipment: 'equipment', medical: 'medical', vehicles: 'vehicles', assets: 'assets' };
+  try {
+    showLoad('Usuwanie...');
+    await sbReq('DELETE', tableMap[col], null, '?id=eq.' + id);
+    DB[col] = DB[col].filter(function(x) { return x.id !== id; });
+    hideLoad(); renderAll(); toast('Usunięto');
+  } catch(e) { hideLoad(); toast('Błąd usuwania!', 'err'); console.error(e); }
+}
+
+// ============================================================
+// RENDER DASHBOARD
+// ============================================================
+function renderDashboard() {
+  var cf = gv('dash-cf');
+  var ws = DB.workers.filter(function(w) { return !cf || w.companyId === cf; });
+  var vs = DB.vehicles.filter(function(v) { return !cf || v.companyId === cf; });
+  var as = DB.assets.filter(function(a) { return !cf || a.companyId === cf; });
+  var alerts = buildAlerts(cf);
+
+  document.getElementById('dash-stats').innerHTML =
+    statCard('👥', ws.filter(function(w){return w.status==='Aktywny';}).length, 'Aktywni pracownicy') +
+    statCard('🚗', vs.length, 'Pojazdy') +
+    statCard('🔧', DB.equipment.length, 'Wyposażenie') +
+    statCard('💼', as.length, 'Aktywa') +
+    statCard('⚠️', alerts.filter(function(a){return a.type==='d';}).length, 'Pilne alerty', 'var(--red)');
+
+  var alertsEl = document.getElementById('dash-alerts');
+  if (!alerts.length) {
+    alertsEl.innerHTML = '<div class="al al-s"><div class="al-ico">✅</div><div class="al-body"><div class="al-title">Wszystko w porządku!</div><div class="al-desc">Brak pilnych terminów.</div></div></div>';
+  } else {
+    alertsEl.innerHTML = alerts.map(function(a) {
+      return '<div class="al al-' + (a.type==='d'?'d':'w') + '"><div class="al-ico">' + a.icon + '</div><div class="al-body"><div class="al-title">' + a.title + '</div><div class="al-desc">' + a.desc + '</div></div><div class="al-date">' + a.date + '</div></div>';
+    }).join('');
+  }
+
+  // Worker tiles
+  var tilesWrap = document.getElementById('dash-tiles-wrap');
+  var activeWorkers = ws.filter(function(w) { return w.status === 'Aktywny'; });
+  if (!activeWorkers.length) { tilesWrap.innerHTML = ''; return; }
+
+  var tilesHtml = activeWorkers.map(function(w) {
+    return buildWorkerTile(w);
+  }).join('');
+
+  tilesWrap.innerHTML = '<h3 style="font-size:14px;font-weight:700;margin:20px 0 14px;color:var(--txt2)">👥 Kafelki pracowników</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">' + tilesHtml + '</div>';
+
+  updateBadges();
+}
+
+function statCard(ico, val, lbl, col) {
+  return '<div class="sc"><div class="sc-ico">' + ico + '</div><div class="sc-val"' + (col ? ' style="color:' + col + '"' : '') + '>' + val + '</div><div class="sc-lbl">' + lbl + '</div></div>';
+}
+
+function buildWorkerTile(w) {
+  var c = avColor(w.firstname + w.lastname);
+  var ini = (w.firstname[0] || '') + (w.lastname[0] || '');
+  var med = DB.medical.filter(function(m) { return m.workerId === w.id; }).sort(function(a,b) { return new Date(b.validTo) - new Date(a.validTo); })[0];
+  var days = med ? daysLeft(med.validTo) : null;
+  var medCol = days === null ? 'var(--txt3)' : days < 0 ? 'var(--red)' : days <= 30 ? 'var(--org)' : 'var(--grn)';
+  var medTxt = days === null ? 'Brak badania' : days < 0 ? ('Wygasło ' + Math.abs(days) + 'd temu') : (days + 'd');
+  var sep = w.sep || {};
+  var sepList = ['g1e','g1d','g2e','g2d','g3e','g3d','pom'].filter(function(k) { return sep[k]; }).map(function(k) { return {g1e:'G1-E',g1d:'G1-D',g2e:'G2-E',g2d:'G2-D',g3e:'G3-E',g3d:'G3-D',pom:'Pom.'}[k]; });
+  var ops = w.operators || {};
+  var opList = ['koparka','ladowarka','dzwig','wozek','podnosnik','koparko','mini','suwnica'].filter(function(k) { return ops[k]; }).map(function(k) { return {koparka:'Koparka',ladowarka:'Ładowarka',dzwig:'Żuraw',wozek:'Wózek',podnosnik:'Podnośnik',koparko:'Koparko-ład.',mini:'Miniład.',suwnica:'Suwnica'}[k]; });
+  var lic = (w.licenseCategories || []).join(', ');
+
+  return '<div class="tile" data-wid="' + w.id + '">' +
+    '<div style="padding:14px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px">' +
+      '<div class="av" style="background:' + c + ';width:38px;height:38px;font-size:13px">' + ini + '</div>' +
+      '<div><div style="font-size:12px;font-weight:700">' + w.firstname + ' ' + w.lastname + '</div>' +
+      '<div style="font-size:10px;color:var(--txt2)">' + w.position + '</div></div>' +
+    '</div>' +
+    '<div style="padding:12px 14px;display:flex;flex-direction:column;gap:5px">' +
+      '<div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--txt2)">🏥 Badania</span><span style="font-weight:700;color:' + medCol + '">' + medTxt + '</span></div>' +
+      (days !== null ? '<div style="height:3px;background:var(--surf3);border-radius:2px"><div style="height:100%;width:' + Math.min(100, Math.max(3, days <= 0 ? 100 : days/365*100)) + '%;background:' + medCol + ';border-radius:2px"></div></div>' : '') +
+      (sepList.length ? '<div style="font-size:10px;color:var(--txt2)">⚡ ' + sepList.join(', ') + '</div>' : '') +
+      (opList.length ? '<div style="font-size:10px;color:var(--txt2)">🏗️ ' + opList.join(', ') + '</div>' : '') +
+      (lic ? '<div style="font-size:10px;color:var(--txt2)">🚗 ' + lic + '</div>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+function buildAlerts(cf) {
+  var alerts = [];
+  DB.medical.forEach(function(m) {
+    var days = daysLeft(m.validTo); if (days > 30) return;
+    var w = DB.workers.find(function(x) { return x.id === m.workerId; }); if (!w) return;
+    if (cf && w.companyId !== cf) return;
+    var n = w.firstname + ' ' + w.lastname;
+    alerts.push({ type: days < 0 ? 'd' : 'w', icon: '🏥', title: 'Badanie lekarskie — ' + n, desc: m.type + ' | ' + (days < 0 ? 'Wygasło ' + Math.abs(days) + 'd temu' : 'Pozostało ' + days + 'd'), date: fmtDate(m.validTo) });
+  });
+  DB.vehicles.forEach(function(v) {
+    if (cf && v.companyId !== cf) return;
+    var vn = v.brand + ' ' + v.model + ' (' + v.plate + ')';
+    var iD = daysLeft(v.inspection), oD = daysLeft(v.insuranceOC);
+    if (v.inspection && iD <= 30) alerts.push({ type: iD < 0 ? 'd' : 'w', icon: '🔧', title: 'Przegląd — ' + vn, desc: iD < 0 ? ('Wygasł ' + Math.abs(iD) + 'd temu') : ('Pozostało ' + iD + 'd'), date: fmtDate(v.inspection) });
+    if (v.insuranceOC && oD <= 30) alerts.push({ type: oD < 0 ? 'd' : 'w', icon: '🛡️', title: 'OC — ' + vn, desc: oD < 0 ? ('Wygasło ' + Math.abs(oD) + 'd temu') : ('Pozostało ' + oD + 'd'), date: fmtDate(v.insuranceOC) });
+  });
+  return alerts.sort(function(a,b) { return a.type === 'd' ? -1 : 1; });
+}
+
+// ============================================================
+// RENDER WORKERS
+// ============================================================
+function renderWorkers() {
+  var tbody = document.getElementById('w-tbody'); if (!tbody) return;
+  var cf = gv('wf-co'), df = gv('wf-dept'), sf = gv('wf-status'), q = gv('wf-q').toLowerCase();
+  var ws = DB.workers.filter(function(w) {
+    return (!cf || w.companyId === cf) && (!df || w.dept === df) && (!sf || w.status === sf) &&
+      (!q || (w.firstname + ' ' + w.lastname + ' ' + (w.position||'') + ' ' + (w.pesel||'')).toLowerCase().indexOf(q) >= 0);
+  });
+  if (!ws.length) { tbody.innerHTML = emptyRow(8, '👤', 'Brak pracowników'); return; }
+  var stMap = { Aktywny: 'bg', Urlop: 'bb', Nieaktywny: 'bgr', 'Zwolnienie lekarskie': 'by' };
+  tbody.innerHTML = ws.map(function(w) {
+    var c = avColor(w.firstname + w.lastname);
+    var ini = (w.firstname[0]||'') + (w.lastname[0]||'');
+    var co = DB.companies.find(function(x) { return x.id === w.companyId; });
+    var med = DB.medical.filter(function(m) { return m.workerId === w.id; }).sort(function(a,b) { return new Date(b.validTo)-new Date(a.validTo); })[0];
+    var medBdg = med ? statusBadge(daysLeft(med.validTo)) : '<span class="bdg by">Brak</span>';
+    return '<tr>' +
+      '<td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:' + c + '">' + ini + '</div><div>' +
+        '<div style="font-weight:600;cursor:pointer;color:var(--acc)" onclick="openWorkerDetail(\'' + w.id + '\')">' + w.firstname + ' ' + w.lastname + '</div>' +
+        '<div style="font-size:11px;color:var(--txt2)">' + (w.email||'') + '</div></div></div></td>' +
+      '<td class="mono">' + (w.pesel||'—') + '</td>' +
+      '<td>' + w.position + '</td>' +
+      '<td>' + (co ? '<span class="bdg bb">' + (co.icon||'🏢') + ' ' + co.name + '</span>' : '—') + '</td>' +
+      '<td><span class="bdg bgr">' + (w.dept||'—') + '</span></td>' +
+      '<td class="mono">' + (w.phone||'—') + '</td>' +
+      '<td><span class="bdg ' + (stMap[w.status]||'bgr') + '">' + (w.status||'—') + '</span></td>' +
+      '<td><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-s btn-xs" onclick="openWorkerDetail(\'' + w.id + '\')">👁 Karta</button>' +
+        '<button class="btn btn-s btn-xs" onclick="openWModal(\'' + w.id + '\')">✏️</button>' +
+        '<button class="btn btn-d btn-xs" onclick="delItem(\'workers\',\'' + w.id + '\')">🗑️</button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function openWorkerDetail(id) {
+  CUR_WORKER = id;
+  var w = DB.workers.find(function(x) { return x.id === id; });
+  if (!w) return;
+  document.getElementById('wd-name').textContent = w.firstname + ' ' + w.lastname;
+  document.getElementById('wd-sub').textContent = w.position + ' | ' + (w.dept||'') + ' | ' + coName(w.companyId);
+  document.getElementById('wd-edit-btn').onclick = function() { openWModal(id); };
+  document.getElementById('add-med-btn').onclick = function() { openMModal(null, id); };
+  // Info grid
+  var sep = w.sep || {};
+  var sepList = Object.entries({g1e:'G1-E',g1d:'G1-D',g2e:'G2-E',g2d:'G2-D',g3e:'G3-E',g3d:'G3-D',pom:'Pomiary'}).filter(function(e) { return sep[e[0]]; }).map(function(e) { return e[1]; }).join(', ') || 'Brak';
+  var ops = w.operators || {};
+  var opNames = {koparka:'Koparka',ladowarka:'Ładowarka',dzwig:'Żuraw',wozek:'Wózek',podnosnik:'Podnośnik',koparko:'Koparko-ład.',mini:'Miniład.',suwnica:'Suwnica'};
+  var opList = Object.entries(opNames).filter(function(e) { return ops[e[0]]; }).map(function(e) { return e[1]; }).join(', ') || 'Brak';
+  var fields = [
+    {l:'PESEL',v:w.pesel},{l:'Nr dowodu',v:w.idCard},{l:'Data urodzenia',v:fmtDate(w.birthDate)},
+    {l:'Miejsce urodzenia',v:w.birthPlace},{l:'Adres',v:w.address},{l:'Miasto',v:(w.zip||'')+' '+(w.city||'')},
+    {l:'Telefon',v:w.phone},{l:'Email',v:w.email},{l:'Data zatrudnienia',v:fmtDate(w.hireDate)},
+    {l:'Typ umowy',v:w.contract},{l:'Koniec umowy',v:w.contractEnd?fmtDate(w.contractEnd):'Bezterminowa'},{l:'Status',v:w.status},
+    {l:'Kontakt alarmowy',v:(w.emergencyName||'—')+' '+( w.emergencyPhone||'')},{l:'Prawo jazdy',v:(w.licenseCategories||[]).join(', ')||'Brak'},{l:'Nr PJ',v:w.licenseNr},
+    {l:'SEP',v:sepList},{l:'Nr SEP / ważne do',v:(w.sepNr||'—')+' / '+fmtDate(w.sepValid)},{l:'Uprawnienia UDT',v:opList},
+    {l:'Nr UDT',v:w.operatorNr},{l:'UDT ważne do',v:fmtDate(w.operatorValid)},{l:'Uwagi',v:w.notes}
+  ];
+  document.getElementById('wd-info-grid').innerHTML = fields.map(function(f) {
+    return '<div class="icard"><div class="icard-lbl">' + f.l + '</div><div class="icard-val">' + (f.v||'—') + '</div></div>';
+  }).join('');
+  renderWEquipList(id);
+  renderWMedList(id);
+  // Reset tabs
+  document.querySelectorAll('.wtab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.wt').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('wt-info').classList.add('active');
+  document.querySelector('.wtab').classList.add('active');
+  navTo('worker-detail');
+}
+
+function renderWEquipList(wid) {
+  var el = document.getElementById('wd-equip-list'); if (!el) return;
+  var eq = DB.equipment.filter(function(e) { return e.workerId === wid; });
+  if (!eq.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--txt3)">Brak wyposażenia</div>'; return; }
+  el.innerHTML = eq.map(function(e) {
+    return '<div class="eq-row"><div><div style="font-size:12px;font-weight:600">' + e.name + '</div><div style="font-size:11px;color:var(--txt2)">' + (e.category||'') + ' | SN: ' + (e.serial||'—') + ' | ' + fmtDate(e.buyDate) + ' | ' + fmtMoney(e.value) + '</div></div>' +
+      '<div style="display:flex;gap:5px"><span class="bdg ' + (e.condition==='Nowy'?'bg':e.condition==='Do naprawy'?'br':'bgr') + '">' + e.condition + '</span>' +
+      '<button class="btn btn-s btn-xs" onclick="openEModal(\'' + e.id + '\')">✏️</button>' +
+      '<button class="btn btn-d btn-xs" onclick="delItem(\'equipment\',\'' + e.id + '\')">🗑️</button></div></div>';
+  }).join('');
+}
+
+function renderWMedList(wid) {
+  var el = document.getElementById('wd-med-list'); if (!el) return;
+  var meds = DB.medical.filter(function(m) { return m.workerId === wid; }).sort(function(a,b) { return new Date(b.validTo)-new Date(a.validTo); });
+  if (!meds.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--txt3)">Brak badań</div>'; return; }
+  el.innerHTML = '<div class="tw"><table><thead><tr><th>Typ</th><th>Data</th><th>Ważne do</th><th>Placówka</th><th>Status</th><th>Akcje</th></tr></thead><tbody>' +
+    meds.map(function(m) {
+      return '<tr><td><span class="bdg bb">' + m.type + '</span></td><td class="mono">' + fmtDate(m.date) + '</td><td class="mono">' + fmtDate(m.validTo) + '</td><td>' + (m.clinic||'—') + '</td><td>' + statusBadge(daysLeft(m.validTo)) + '</td>' +
+        '<td><div style="display:flex;gap:4px"><button class="btn btn-s btn-xs" onclick="openMModal(\'' + m.id + '\')">✏️</button><button class="btn btn-d btn-xs" onclick="delItem(\'medical\',\'' + m.id + '\')">🗑️</button></div></td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+function showWTab(tab, btn) {
+  document.querySelectorAll('.wt').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.wtab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('wt-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'equip' && CUR_WORKER) renderWEquipList(CUR_WORKER);
+  if (tab === 'medical' && CUR_WORKER) renderWMedList(CUR_WORKER);
+}
+
+// ============================================================
+// RENDER EQUIPMENT
+// ============================================================
+function renderEquipment() {
+  var tbody = document.getElementById('e-tbody'); if (!tbody) return;
+  var cf = gv('ef-cat'), wf = gv('ef-w'), q = gv('ef-q').toLowerCase();
+  var eq = DB.equipment.filter(function(e) {
+    return (!cf || e.category === cf) && (!wf || e.workerId === wf) &&
+      (!q || (e.name + (e.serial||'') + (e.category||'')).toLowerCase().indexOf(q) >= 0);
+  });
+  if (!eq.length) { tbody.innerHTML = emptyRow(8, '🔧', 'Brak wyposażenia'); return; }
+  tbody.innerHTML = eq.map(function(e) {
+    return '<tr><td style="font-weight:600">' + e.name + '</td><td><span class="bdg bb">' + (e.category||'—') + '</span></td>' +
+      '<td class="mono">' + (e.serial||'—') + '</td>' +
+      '<td>' + (e.workerId ? '<span style="color:var(--acc)">' + wName(e.workerId) + '</span>' : '—') + '</td>' +
+      '<td class="mono">' + fmtDate(e.buyDate) + '</td><td style="color:var(--grn)">' + fmtMoney(e.value) + '</td>' +
+      '<td>' + (e.warranty ? statusBadge(daysLeft(e.warranty)) : '—') + '</td>' +
+      '<td><div style="display:flex;gap:4px"><button class="btn btn-s btn-xs" onclick="openEModal(\'' + e.id + '\')">✏️</button><button class="btn btn-d btn-xs" onclick="delItem(\'equipment\',\'' + e.id + '\')">🗑️</button></div></td></tr>';
+  }).join('');
+}
+
+// ============================================================
+// RENDER MEDICAL LIST
+// ============================================================
+function renderMedicalList() {
+  var tbody = document.getElementById('m-tbody'); if (!tbody) return;
+  var sf = gv('mf-s'), q = gv('mf-q').toLowerCase();
+  var ms = DB.medical.filter(function(m) {
+    var d = daysLeft(m.validTo);
+    var ok = (!sf) || (sf==='ok'&&d>30) || (sf==='warn'&&d>=0&&d<=30) || (sf==='exp'&&d<0);
+    return ok && (!q || wName(m.workerId).toLowerCase().indexOf(q) >= 0 || (m.type||'').toLowerCase().indexOf(q) >= 0);
+  }).sort(function(a,b) { return daysLeft(a.validTo) - daysLeft(b.validTo); });
+  if (!ms.length) { tbody.innerHTML = emptyRow(7, '🏥', 'Brak badań'); return; }
+  tbody.innerHTML = ms.map(function(m) {
+    var d = daysLeft(m.validTo);
+    return '<tr>' +
+      '<td style="font-weight:600;color:var(--acc);cursor:pointer" onclick="openWorkerDetail(\'' + m.workerId + '\')">' + wName(m.workerId) + '</td>' +
+      '<td><span class="bdg bb">' + m.type + '</span></td>' +
+      '<td class="mono">' + fmtDate(m.date) + '</td><td class="mono">' + fmtDate(m.validTo) + '</td>' +
+      '<td>' + daysBadge(d) + '</td><td>' + statusBadge(d) + '</td>' +
+      '<td><div style="display:flex;gap:4px">' +
+        '<button class="btn btn-g btn-xs" onclick="CUR_WORKER=\'' + m.workerId + '\';genDoc(\'skierowanie\')">📄 Skier.</button>' +
+        '<button class="btn btn-s btn-xs" onclick="openMModal(\'' + m.id + '\')">✏️</button>' +
+        '<button class="btn btn-d btn-xs" onclick="delItem(\'medical\',\'' + m.id + '\')">🗑️</button>' +
+      '</div></td></tr>';
+  }).join('');
+}
+
+// ============================================================
+// RENDER MEDICAL TILES
+// ============================================================
+function renderMedTiles() {
+  var grid = document.getElementById('mt-grid'); if (!grid) return;
+  var cf = gv('mt-co'), sf = gv('mt-s'), q = gv('mt-q').toLowerCase();
+  var ws = DB.workers.filter(function(w) { return (!cf || w.companyId === cf) && (!q || (w.firstname+' '+w.lastname+' '+w.position).toLowerCase().indexOf(q) >= 0); });
+  var withStatus = ws.map(function(w) {
+    var med = DB.medical.filter(function(m) { return m.workerId === w.id; }).sort(function(a,b) { return new Date(b.validTo)-new Date(a.validTo); })[0];
+    var days = med ? daysLeft(med.validTo) : null;
+    return { w: w, med: med, days: days };
+  });
+  var filtered = withStatus;
+  if (sf === 'exp') filtered = withStatus.filter(function(x) { return x.days !== null && x.days < 0; });
+  else if (sf === 'warn') filtered = withStatus.filter(function(x) { return x.days !== null && x.days >= 0 && x.days <= 30; });
+  else if (sf === 'ok') filtered = withStatus.filter(function(x) { return x.days !== null && x.days > 30; });
+  else if (sf === 'none') filtered = withStatus.filter(function(x) { return x.days === null; });
+  filtered.sort(function(a,b) { var sa = a.days===null?9999:a.days; var sb = b.days===null?9999:b.days; return sa-sb; });
+
+  var exp = withStatus.filter(function(x){return x.days!==null&&x.days<0;}).length;
+  var warn = withStatus.filter(function(x){return x.days!==null&&x.days>=0&&x.days<=30;}).length;
+  var ok = withStatus.filter(function(x){return x.days!==null&&x.days>30;}).length;
+  document.getElementById('mt-summary').innerHTML =
+    statCard('👥', withStatus.length, 'Wszyscy') +
+    statCard('🔴', exp, 'Przeterminowane', 'var(--red)') +
+    statCard('🟡', warn, 'Wygasają ≤30d', 'var(--org)') +
+    statCard('🟢', ok, 'Aktualne', 'var(--grn)');
+
+  if (!filtered.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--txt3)"><div style="font-size:40px;margin-bottom:12px">🏥</div><p>Brak wyników</p></div>'; return; }
+
+  grid.innerHTML = filtered.map(function(item) {
+    var w = item.w, med = item.med, days = item.days;
+    var c = avColor(w.firstname+w.lastname);
+    var ini = (w.firstname[0]||'')+(w.lastname[0]||'');
+    var co = DB.companies.find(function(x){return x.id===w.companyId;});
+    var col = days===null?'var(--txt3)':days<0?'var(--red)':days<=30?'var(--org)':'var(--grn)';
+    var stTxt = days===null?'⚫ Brak badania':days<0?'🔴 Przeterminowane':days<=14?'🔴 Pilne!':days<=30?'🟡 Wygasa wkrótce':'🟢 Aktualne';
+    var barW = days===null?0:Math.min(100,Math.max(3,days<=0?100:days/365*100));
+    return '<div class="tile" data-wid="' + w.id + '">' +
+      '<div style="padding:14px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px">' +
+        '<div class="av" style="background:' + c + ';width:38px;height:38px;font-size:13px">' + ini + '</div>' +
+        '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + w.firstname + ' ' + w.lastname + '</div>' +
+        '<div style="font-size:10px;color:var(--txt2)">' + w.position + '</div></div>' +
+      '</div>' +
+      '<div style="padding:12px 14px">' +
+        '<div style="font-size:12px;font-weight:700;color:' + col + ';margin-bottom:6px">' + stTxt + '</div>' +
+        (days !== null ? '<div style="height:4px;background:var(--surf3);border-radius:4px;margin-bottom:6px"><div style="height:100%;width:' + barW + '%;background:' + col + ';border-radius:4px"></div></div>' : '') +
+        (days !== null ? '<div style="font-size:11px;color:var(--txt2)">' + (days<0?'Wygasło '+Math.abs(days)+'d temu':'Pozostało '+days+'d') + '</div>' : '') +
+        (med ? '<div style="font-size:11px;color:var(--txt2);margin-top:3px">Ważne do: <span class="mono">' + fmtDate(med.validTo) + '</span></div>' : '') +
+        (co ? '<div style="font-size:10px;color:var(--txt3);margin-top:6px;padding-top:6px;border-top:1px solid var(--b)">' + (co.icon||'🏢') + ' ' + co.name + '</div>' : '') +
+      '</div>' +
+      '<div style="padding:8px 14px;border-top:1px solid var(--b);display:flex;gap:6px">' +
+        '<button class="btn btn-g btn-xs" onclick="event.stopPropagation();CUR_WORKER=\'' + w.id + '\';genDoc(\'skierowanie\')">📄 Skierowanie</button>' +
+        '<button class="btn btn-p btn-xs" onclick="event.stopPropagation();openMModal(null,\'' + w.id + '\')">+ Badanie</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ============================================================
+// RENDER UPRAWNIENIA
+// ============================================================
+function renderUprawnienia() {
+  var grid = document.getElementById('uf-grid'); if (!grid) return;
+  var cf = gv('uf-co'), ff = gv('uf-f'), q = gv('uf-q').toLowerCase();
+  var ws = DB.workers.filter(function(w) {
+    if (cf && w.companyId !== cf) return false;
+    if (q && (w.firstname+' '+w.lastname+' '+w.position).toLowerCase().indexOf(q) < 0) return false;
+    if (ff === 'sep') { var s = w.sep||{}; return Object.values(s).some(Boolean); }
+    if (ff === 'udt') { var o = w.operators||{}; return Object.values(o).some(Boolean); }
+    if (ff === 'pj') return (w.licenseCategories||[]).length > 0;
+    return true;
+  });
+
+  var hasSep = DB.workers.filter(function(w){return (!cf||w.companyId===cf)&&w.sep&&Object.values(w.sep).some(Boolean);}).length;
+  var hasUdt = DB.workers.filter(function(w){return (!cf||w.companyId===cf)&&w.operators&&Object.values(w.operators).some(Boolean);}).length;
+  var hasPj = DB.workers.filter(function(w){return (!cf||w.companyId===cf)&&(w.licenseCategories||[]).length>0;}).length;
+  document.getElementById('uf-summary').innerHTML =
+    statCard('👥', DB.workers.filter(function(w){return !cf||w.companyId===cf;}).length, 'Wszyscy') +
+    statCard('⚡', hasSep, 'Mają SEP', 'var(--acc)') +
+    statCard('🏗️', hasUdt, 'Mają UDT', 'var(--pur)') +
+    statCard('🚗', hasPj, 'Mają PJ', 'var(--grn)');
+
+  if (!ws.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--txt3)"><div style="font-size:40px;margin-bottom:12px">⚡</div><p>Brak wyników</p></div>'; return; }
+
+  var sepLbls = {g1e:'G1-E',g1d:'G1-D',g2e:'G2-E',g2d:'G2-D',g3e:'G3-E',g3d:'G3-D',pom:'Pomiary'};
+  var opLbls = {koparka:'Koparka',ladowarka:'Ładowarka',dzwig:'Żuraw',wozek:'Wózek',podnosnik:'Podnośnik',koparko:'Koparko-ład.',mini:'Miniład.',suwnica:'Suwnica'};
+
+  grid.innerHTML = ws.map(function(w) {
+    var c = avColor(w.firstname+w.lastname);
+    var ini = (w.firstname[0]||'')+(w.lastname[0]||'');
+    var co = DB.companies.find(function(x){return x.id===w.companyId;});
+    var sep = w.sep||{};
+    var ops = w.operators||{};
+    var lic = w.licenseCategories||[];
+    var sepList = Object.entries(sepLbls).filter(function(e){return sep[e[0]];}).map(function(e){return e[1];});
+    var opList = Object.entries(opLbls).filter(function(e){return ops[e[0]];}).map(function(e){return e[1];});
+    var sD = w.sepValid ? daysLeft(w.sepValid) : null;
+    var oD = w.operatorValid ? daysLeft(w.operatorValid) : null;
+    var sCol = sD===null?'var(--txt3)':sD<0?'var(--red)':sD<=30?'var(--org)':'var(--grn)';
+    var oCol = oD===null?'var(--txt3)':oD<0?'var(--red)':oD<=30?'var(--org)':'var(--grn)';
+    return '<div class="tile" data-wid="' + w.id + '">' +
+      '<div style="padding:14px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px">' +
+        '<div class="av" style="background:' + c + ';width:38px;height:38px;font-size:13px">' + ini + '</div>' +
+        '<div><div style="font-size:12px;font-weight:700">' + w.firstname + ' ' + w.lastname + '</div>' +
+        '<div style="font-size:10px;color:var(--txt2)">' + w.position + (co?' · '+co.name:'') + '</div></div>' +
+      '</div>' +
+      '<div style="padding:10px 14px;border-bottom:1px solid var(--b)">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">⚡ SEP</div>' +
+        (sepList.length ? '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px">' + sepList.map(function(s){return '<span class="bdg bb" style="font-size:10px">'+s+'</span>';}).join('') + '</div>' +
+          '<div style="font-size:11px;color:' + sCol + ';font-weight:600">' + (w.sepNr||'—') + ' | do ' + fmtDate(w.sepValid) + (sD!==null?' ('+daysBadge(sD).replace(/<[^>]+>/g,'')+')'  :'') + '</div>'
+          : '<div style="font-size:11px;color:var(--txt3)">Brak uprawnień SEP</div>') +
+      '</div>' +
+      '<div style="padding:10px 14px;border-bottom:1px solid var(--b)">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">🏗️ UDT</div>' +
+        (opList.length ? '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px">' + opList.map(function(o){return '<span class="bdg bp" style="font-size:10px">'+o+'</span>';}).join('') + '</div>' +
+          '<div style="font-size:11px;color:' + oCol + ';font-weight:600">' + (w.operatorNr||'—') + ' | do ' + fmtDate(w.operatorValid) + '</div>'
+          : '<div style="font-size:11px;color:var(--txt3)">Brak uprawnień UDT</div>') +
+      '</div>' +
+      '<div style="padding:10px 14px">' +
+        '<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">🚗 Prawo jazdy</div>' +
+        (lic.length ? '<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px">' + lic.map(function(l){return '<span class="bdg bg" style="font-size:10px">'+l+'</span>';}).join('') + '</div>' +
+          (w.licenseNr ? '<div style="font-size:11px;color:var(--txt2)">Nr: ' + w.licenseNr + '</div>' : '')
+          : '<div style="font-size:11px;color:var(--txt3)">Brak prawa jazdy</div>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ============================================================
+// RENDER VEHICLES
+// ============================================================
+function renderVehicles() {
+  var tbody = document.getElementById('v-tbody'); if (!tbody) return;
+  var cf = gv('vf-co'), sf = gv('vf-s'), q = gv('vf-q').toLowerCase();
+  var vs = DB.vehicles.filter(function(v) {
+    if (cf && v.companyId !== cf) return false;
+    if (q && (v.brand+v.model+v.plate).toLowerCase().indexOf(q) < 0) return false;
+    var d = Math.min(daysLeft(v.inspection), daysLeft(v.insuranceOC));
+    if (sf === 'warn') return d >= 0 && d <= 30;
+    if (sf === 'exp') return d < 0;
+    return true;
+  });
+  if (!vs.length) { tbody.innerHTML = emptyRow(9, '🚗', 'Brak pojazdów'); return; }
+  tbody.innerHTML = vs.map(function(v) {
+    var iD = daysLeft(v.inspection), oD = daysLeft(v.insuranceOC);
+    var worst = Math.min(iD, oD);
+    var co = DB.companies.find(function(x){return x.id===v.companyId;});
+    return '<tr>' +
+      '<td><div style="font-weight:700">' + v.brand + ' ' + v.model + '</div><div class="mono" style="color:var(--txt2)">' + (v.year||'') + '</div></td>' +
+      '<td><span class="bdg bb mono">' + v.plate + '</span></td>' +
+      '<td>' + (co?co.name:'—') + '</td>' +
+      '<td>' + (v.driverId?wName(v.driverId):'—') + '</td>' +
+      '<td><div class="mono">' + fmtDate(v.inspection) + '</div>' + daysBadge(iD) + '</td>' +
+      '<td><div class="mono">' + fmtDate(v.insuranceOC) + '</div>' + daysBadge(oD) + '</td>' +
+      '<td>' + (v.insuranceAC?'<div class="mono">'+fmtDate(v.insuranceAC)+'</div>':'—') + '</td>' +
+      '<td>' + statusBadge(worst) + '</td>' +
+      '<td><div style="display:flex;gap:4px"><button class="btn btn-s btn-xs" onclick="openVModal(\'' + v.id + '\')">✏️</button><button class="btn btn-d btn-xs" onclick="delItem(\'vehicles\',\'' + v.id + '\')">🗑️</button></div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ============================================================
+// RENDER ASSETS
+// ============================================================
+function renderAssets() {
+  var tbody = document.getElementById('a-tbody'); if (!tbody) return;
+  var cf = gv('af-co'), catf = gv('af-cat'), q = gv('af-q').toLowerCase();
+  var as = DB.assets.filter(function(a) {
+    return (!cf||a.companyId===cf) && (!catf||a.category===catf) && (!q||(a.name+(a.invNum||'')+(a.location||'')).toLowerCase().indexOf(q)>=0);
+  });
+  if (!as.length) { tbody.innerHTML = emptyRow(8, '💼', 'Brak aktywów'); return; }
+  var condMap = {Nowy:'bg',Dobry:'bb',Używany:'bgr','Do naprawy':'br',Wycofany:'br'};
+  tbody.innerHTML = as.map(function(a) {
+    var co = DB.companies.find(function(x){return x.id===a.companyId;});
+    return '<tr><td style="font-weight:600">' + a.name + '</td><td><span class="bdg bb">' + (a.category||'—') + '</span></td>' +
+      '<td class="mono">' + (a.invNum||'—') + '</td><td>' + (co?co.name:'—') + '</td>' +
+      '<td>' + (a.location||'—') + '</td><td style="color:var(--grn)">' + fmtMoney(a.value) + '</td>' +
+      '<td><span class="bdg ' + (condMap[a.condition]||'bgr') + '">' + a.condition + '</span></td>' +
+      '<td><div style="display:flex;gap:4px"><button class="btn btn-s btn-xs" onclick="openAModal(\'' + a.id + '\')">✏️</button><button class="btn btn-d btn-xs" onclick="delItem(\'assets\',\'' + a.id + '\')">🗑️</button></div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ============================================================
+// RENDER SETTINGS
+// ============================================================
+function renderSettings() {
+  var el = document.getElementById('co-list'); if (!el) return;
+  if (!DB.companies.length) { el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--txt3)">Brak firm. Dodaj pierwszą!</div>'; return; }
+  el.innerHTML = DB.companies.map(function(c) {
+    return '<div style="background:var(--surf2);border:1px solid var(--b2);border-radius:var(--r);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px">' +
+      '<div style="width:44px;height:44px;background:var(--surf3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">' + (c.icon||'🏢') + '</div>' +
+      '<div style="flex:1"><div style="font-size:13px;font-weight:700">' + c.name + '</div>' +
+      '<div style="font-size:11px;color:var(--txt2);margin-top:3px">NIP: ' + (c.nip||'—') + ' | ' + (c.address||'—') + '</div></div>' +
+      '<div style="display:flex;gap:6px">' +
+        '<button class="btn btn-s btn-xs" onclick="setActiveCo(\'' + c.id + '\')">✓ Aktywna</button>' +
+        '<button class="btn btn-s btn-xs" onclick="openCoModal(\'' + c.id + '\')">✏️</button>' +
+        '<button class="btn btn-d btn-xs" onclick="delItem(\'companies\',\'' + c.id + '\')">🗑️</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+// ============================================================
+// DOCUMENTS
+// ============================================================
+function populateDocWorkers() {
+  updateSelects();
+  if (CUR_WORKER) sv('doc-w', CUR_WORKER);
+}
+
+function genDoc(type) {
+  if (CUR_WORKER) sv('doc-w', CUR_WORKER);
+  if (type) sv('doc-type', type);
+  navTo('documents');
+  generateDoc();
+}
+
+function generateDoc() {
+  var wid = gv('doc-w'); if (!wid) { toast('Wybierz pracownika', 'err'); return; }
+  var type = gv('doc-type');
+  var w = DB.workers.find(function(x){return x.id===wid;}); if (!w) return;
+  var co = DB.companies.find(function(x){return x.id===w.companyId;}) || {name:'[Nazwa firmy]',address:'[Adres]',nip:'[NIP]'};
+  var html = '';
+  if (type === 'skierowanie') html = docSkierowanie(w, co);
+  else if (type === 'umowa-praca') html = docUmowaPraca(w, co);
+  else if (type === 'umowa-zlecenie') html = docUmowaZlecenie(w, co);
+  else if (type === 'karta-wyposazenia') html = docKartaWyposazenia(w, co);
+  document.getElementById('doc-preview').innerHTML = html;
+  var docEl = document.getElementById('wd-doc-preview');
+  if (docEl) docEl.innerHTML = html;
+}
+
+function today() { return new Date().toLocaleDateString('pl-PL'); }
+
+function docSkierowanie(w, co) {
+  return '<div class="pdf"><h2>SKIEROWANIE NA BADANIA LEKARSKIE</h2><div class="pdf-sub">art. 229 Kodeksu Pracy | Data: ' + today() + '</div><hr class="pdf-line">' +
+    '<div class="pdf-sec"><h3>Dane pracodawcy</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Nazwa:</div><div class="pdf-fv">' + co.name + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Adres:</div><div class="pdf-fv">' + (co.address||'—') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">NIP:</div><div class="pdf-fv">' + (co.nip||'—') + '</div></div></div>' +
+    '<div class="pdf-sec"><h3>Dane pracownika</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Imię i nazwisko:</div><div class="pdf-fv">' + w.firstname + ' ' + w.lastname + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">PESEL:</div><div class="pdf-fv">' + (w.pesel||'—') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Adres:</div><div class="pdf-fv">' + (w.address||'') + ' ' + (w.city||'') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Stanowisko:</div><div class="pdf-fv">' + w.position + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Rodzaj badania:</div><div class="pdf-fv">☐ Wstępne &nbsp;&nbsp; ☑ Okresowe &nbsp;&nbsp; ☐ Kontrolne</div></div></div>' +
+    '<div class="pdf-sec"><h3>Czynniki narażenia</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Czynniki szkodliwe:</div><div class="pdf-fv">Praca na wysokości, prąd elektryczny</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Czynniki uciążliwe:</div><div class="pdf-fv">Wymuszona pozycja ciała, praca z monitorem</div></div></div>' +
+    '<div class="pdf-sign"><div class="pdf-sign-box">Podpis pracownika<br><br><br>...................................</div>' +
+    '<div class="pdf-sign-box">Pracodawca / Pieczęć<br><br><br>...................................</div></div></div>';
+}
+
+function docUmowaPraca(w, co) {
+  return '<div class="pdf"><h2>UMOWA O PRACĘ</h2><div class="pdf-sub">zawarta w dniu ' + today() + '</div><hr class="pdf-line">' +
+    '<p style="margin-bottom:10px;font-size:12px">pomiędzy:</p>' +
+    '<div class="pdf-sec"><h3>Pracodawca</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Nazwa:</div><div class="pdf-fv">' + co.name + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Adres:</div><div class="pdf-fv">' + (co.address||'—') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">NIP:</div><div class="pdf-fv">' + (co.nip||'—') + '</div></div></div>' +
+    '<p style="margin:6px 0;font-size:12px">a:</p>' +
+    '<div class="pdf-sec"><h3>Pracownik</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Imię i nazwisko:</div><div class="pdf-fv">' + w.firstname + ' ' + w.lastname + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">PESEL:</div><div class="pdf-fv">' + (w.pesel||'—') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Adres zamieszkania:</div><div class="pdf-fv">' + (w.address||'') + ' ' + (w.zip||'') + ' ' + (w.city||'') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Nr dowodu:</div><div class="pdf-fv">' + (w.idCard||'—') + '</div></div></div>' +
+    '<div class="pdf-sec"><h3>Warunki zatrudnienia</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Stanowisko:</div><div class="pdf-fv">' + w.position + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Wymiar czasu pracy:</div><div class="pdf-fv">pełny etat (8h/dobę, 40h/tyg.)</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Data rozpoczęcia:</div><div class="pdf-fv">' + (w.hireDate ? new Date(w.hireDate).toLocaleDateString('pl-PL') : today()) + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Rodzaj umowy:</div><div class="pdf-fv">☐ czas nieokreślony &nbsp; ☐ czas określony do: ___________</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Wynagrodzenie:</div><div class="pdf-fv">_______________ PLN brutto miesięcznie</div></div></div>' +
+    '<p style="font-size:11px;margin-bottom:14px">Umowę sporządzono w dwóch jednobrzmiących egzemplarzach.</p>' +
+    '<div class="pdf-sign"><div class="pdf-sign-box">Pracownik<br><br><br>...................................</div>' +
+    '<div class="pdf-sign-box">Pracodawca / Pieczęć<br><br><br>...................................</div></div></div>';
+}
+
+function docUmowaZlecenie(w, co) {
+  return '<div class="pdf"><h2>UMOWA ZLECENIE</h2><div class="pdf-sub">nr ___/___ zawarta w dniu ' + today() + '</div><hr class="pdf-line">' +
+    '<div class="pdf-sec"><h3>Zleceniodawca</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Nazwa:</div><div class="pdf-fv">' + co.name + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Adres:</div><div class="pdf-fv">' + (co.address||'—') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">NIP:</div><div class="pdf-fv">' + (co.nip||'—') + '</div></div></div>' +
+    '<div class="pdf-sec"><h3>Zleceniobiorca</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Imię i nazwisko:</div><div class="pdf-fv">' + w.firstname + ' ' + w.lastname + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">PESEL:</div><div class="pdf-fv">' + (w.pesel||'—') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Adres:</div><div class="pdf-fv">' + (w.address||'') + ' ' + (w.zip||'') + ' ' + (w.city||'') + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Nr dowodu:</div><div class="pdf-fv">' + (w.idCard||'—') + '</div></div></div>' +
+    '<div class="pdf-sec"><h3>Przedmiot umowy</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Zakres prac:</div><div class="pdf-fv">' + w.position + ' — wg ustaleń stron</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Termin realizacji:</div><div class="pdf-fv">od _____________ do _____________</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Wynagrodzenie:</div><div class="pdf-fv">_______________ PLN brutto</div></div></div>' +
+    '<div class="pdf-sign"><div class="pdf-sign-box">Zleceniobiorca<br><br><br>...................................</div>' +
+    '<div class="pdf-sign-box">Zleceniodawca<br><br><br>...................................</div></div></div>';
+}
+
+function docKartaWyposazenia(w, co) {
+  var eq = DB.equipment.filter(function(e){return e.workerId===w.id;});
+  var rows = eq.length ? eq.map(function(e,i){
+    return '<tr><td style="border:1px solid #ccc;padding:6px">'+(i+1)+'</td><td style="border:1px solid #ccc;padding:6px">'+e.name+'</td><td style="border:1px solid #ccc;padding:6px">'+(e.serial||'—')+'</td><td style="border:1px solid #ccc;padding:6px">'+fmtDate(e.buyDate)+'</td><td style="border:1px solid #ccc;padding:6px">................................</td></tr>';
+  }).join('') : '<tr><td colspan="5" style="border:1px solid #ccc;padding:10px;text-align:center;color:#999">Brak wyposażenia</td></tr>';
+  return '<div class="pdf"><h2>KARTA WYPOSAŻENIA PRACOWNIKA</h2><div class="pdf-sub">' + co.name + ' | Data: ' + today() + '</div><hr class="pdf-line">' +
+    '<div class="pdf-sec"><h3>Dane pracownika</h3>' +
+    '<div class="pdf-f"><div class="pdf-fl">Imię i nazwisko:</div><div class="pdf-fv">' + w.firstname + ' ' + w.lastname + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Stanowisko:</div><div class="pdf-fv">' + w.position + '</div></div>' +
+    '<div class="pdf-f"><div class="pdf-fl">Data zatrudnienia:</div><div class="pdf-fv">' + fmtDate(w.hireDate) + '</div></div></div>' +
+    '<div class="pdf-sec"><h3>Wykaz wyposażenia</h3>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:11px"><tr style="background:#f0f0f0"><th style="border:1px solid #ccc;padding:6px">Lp.</th><th style="border:1px solid #ccc;padding:6px">Nazwa</th><th style="border:1px solid #ccc;padding:6px">Nr seryjny</th><th style="border:1px solid #ccc;padding:6px">Data wydania</th><th style="border:1px solid #ccc;padding:6px">Podpis odbioru</th></tr>' + rows + '</table></div>' +
+    '<p style="font-size:11px;margin-top:14px">Pracownik zobowiązuje się do zwrotu wyposażenia przy rozwiązaniu umowy.</p>' +
+    '<div class="pdf-sign"><div class="pdf-sign-box">Pracownik<br><br><br>...................................</div>' +
+    '<div class="pdf-sign-box">Pracodawca / Pieczęć<br><br><br>...................................</div></div></div>';
+}
+
+function printDoc() {
+  var content = document.getElementById('doc-preview').innerHTML;
+  if (!content || content.indexOf('Wybierz') >= 0) { toast('Najpierw wygeneruj dokument', 'err'); return; }
+  var win = window.open('', '_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Dokument</title><style>body{margin:0;font-family:sans-serif}.pdf{padding:30px;max-width:700px;margin:0 auto;font-size:12px;line-height:1.6}h2{font-size:16px;font-weight:700;text-align:center}.pdf-sub{text-align:center;font-size:11px;color:#666;margin-bottom:16px}.pdf-line{border:none;border-top:1px solid #ddd;margin:12px 0}.pdf-sec{margin-bottom:14px}.pdf-sec h3{font-size:11px;font-weight:700;text-transform:uppercase;border-bottom:2px solid #3d7fff;padding-bottom:4px;margin-bottom:10px;color:#3d7fff}.pdf-f{display:flex;margin-bottom:5px}.pdf-fl{font-weight:600;width:190px;flex-shrink:0;font-size:11px;color:#444}.pdf-fv{border-bottom:1px solid #ccc;flex:1;min-height:18px;font-size:11px}.pdf-sign{display:flex;gap:40px;margin-top:28px}.pdf-sign-box{flex:1;border-top:1px solid #000;padding-top:8px;text-align:center;font-size:10px;color:#666}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;font-size:11px}th{background:#f0f0f0}@media print{body{margin:0}}</style></head><body>' + content + '<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+// ============================================================
+// IMPORT / EXPORT
+// ============================================================
+var W_COLS = ['imie','nazwisko','stanowisko','dzial','status','telefon','email','pesel','nr_dowodu','data_urodzenia','miejsce_urodzenia','adres','miasto','kod_pocztowy','data_zatrudnienia','typ_umowy','uwagi'];
+var W_EX = ['Jan','Kowalski','Monter','Techniczny','Aktywny','+48600000001','jan@firma.pl','90010112345','ABC 123456','1990-01-01','Warszawa','ul. Kwiatowa 1','Warszawa','00-001','2023-01-15','Umowa o pracę — czas nieokreślony','Przykładowy wpis'];
+var V_COLS = ['marka','model','rejestracja','rok','vin','przebieg_km','przeglad_do','ubezpieczenie_oc_do','ubezpieczenie_ac_do','nastepny_serwis','uwagi'];
+var V_EX = ['Toyota','HiLux','WA 12345','2022','VIN123','45000','2025-06-30','2025-12-31','2025-12-31','2025-03-01','Samochód terenowy'];
+
+function dlTemplate(type, fmt) {
+  var cols = type === 'workers' ? W_COLS : V_COLS;
+  var ex = type === 'workers' ? W_EX : V_EX;
+  var fn = 'wzor_' + type + '_domat.' + fmt;
+  if (fmt === 'csv') {
+    var bom = '\uFEFF';
+    var csv = bom + cols.join(',') + '\n' + ex.map(function(v){return '"'+v+'"';}).join(',');
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = fn; a.click();
+    URL.revokeObjectURL(url);
+  } else {
+    if (typeof XLSX === 'undefined') { toast('Biblioteka Excel nie załadowana', 'err'); return; }
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet([cols, ex]);
+    ws['!cols'] = cols.map(function(){return {wch:20};});
+    XLSX.utils.book_append_sheet(wb, ws, type==='workers'?'Pracownicy':'Pojazdy');
+    var instr = XLSX.utils.aoa_to_sheet([['INSTRUKCJA'],[''],['1. Nie zmieniaj nazw kolumn w pierwszym wierszu'],['2. Daty: RRRR-MM-DD (np. 2024-01-15)'],['3. Telefony z kierunkowym: +48600000000'],['4. Po wypełnieniu zapisz jako .xlsx i zaimportuj']]);
+    XLSX.utils.book_append_sheet(wb, instr, 'Instrukcja');
+    XLSX.writeFile(wb, fn);
+  }
+  toast('Wzór pobrany ✓');
+}
+
+function fmtImportDate(v) {
+  if (!v || v === '') return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  var m1 = v.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m1) return m1[3]+'-'+m1[2].padStart(2,'0')+'-'+m1[1].padStart(2,'0');
+  var m2 = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m2) return m2[3]+'-'+m2[2].padStart(2,'0')+'-'+m2[1].padStart(2,'0');
+  return null;
+}
+
+function normKey(k) {
+  return k.trim().toLowerCase().replace(/\s+/g,'_')
+    .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l')
+    .replace(/ń/g,'n').replace(/ó/g,'o').replace(/ś/g,'s').replace(/ź/g,'z').replace(/ż/g,'z')
+    .replace(/[^a-z0-9_]/g,'');
+}
+
+async function importFile(file, type) {
+  if (!file) return;
+  try {
+    var rows;
+    if (file.name.endsWith('.json')) {
+      var text = await new Promise(function(res){ var r=new FileReader(); r.onload=function(e){res(e.target.result);}; r.readAsText(file,'UTF-8'); });
+      var data = JSON.parse(text);
+      rows = Array.isArray(data) ? data : (data[type]||[]);
+    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      rows = await new Promise(function(res,rej){
+        var r=new FileReader();
+        r.onload=function(e){
+          try{
+            var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+            var ws=wb.Sheets[wb.SheetNames[0]];
+            var raw=XLSX.utils.sheet_to_json(ws,{raw:false,dateNF:'yyyy-mm-dd',defval:''});
+            res(raw.map(function(row){ var n={}; Object.keys(row).forEach(function(k){n[normKey(k)]=String(row[k]||'').trim();}); return n; }).filter(function(r){return Object.values(r).some(Boolean);}));
+          }catch(ex){rej(ex);}
+        };
+        r.readAsArrayBuffer(file);
+      });
+    } else {
+      var csv = await new Promise(function(res){ var r=new FileReader(); r.onload=function(e){res(e.target.result);}; r.readAsText(file,'UTF-8'); });
+      var lines = csv.trim().split(/\r?\n/);
+      var sep = lines[0].indexOf(';')>=0?';':',';
+      var hdrs = lines[0].split(sep).map(function(h){return normKey(h.replace(/^"|"$/g,''));});
+      rows = lines.slice(1).map(function(l){ var vals=l.split(sep).map(function(v){return v.trim().replace(/^"|"$/g,'');}); var o={}; hdrs.forEach(function(h,i){o[h]=vals[i]||'';}); return o; }).filter(function(r){return Object.values(r).some(Boolean);});
+    }
+
+    if (!rows.length) { toast('Plik pusty lub nieprawidłowy', 'err'); return; }
+    showLoad('Importowanie...');
+    var count = 0, errors = 0;
+
+    if (type === 'workers') {
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var fn = row['imie']||row['imię']||row['firstname']||'';
+        var ln = row['nazwisko']||row['lastname']||'';
+        if (!fn || !ln) { errors++; continue; }
+        showLoad('Importowanie pracowników (' + (i+1) + '/' + rows.length + ')...');
+        try {
+          var dbObj = { firstname:fn, lastname:ln, position:row['stanowisko']||row['position']||'Pracownik', dept:row['dzial']||row['dział']||null, status:row['status']||'Aktywny', phone:row['telefon']||null, email:row['email']||null, pesel:String(row['pesel']||'').replace(/\.0$/,'')||null, id_card:row['nr_dowodu']||null, birth_date:fmtImportDate(row['data_urodzenia'])||null, birth_place:row['miejsce_urodzenia']||null, address:row['adres']||null, city:row['miasto']||null, zip:row['kod_pocztowy']||null, hire_date:fmtImportDate(row['data_zatrudnienia'])||null, contract:row['typ_umowy']||null, notes:row['uwagi']||null, license_categories:[], operators:{}, sep:{} };
+          var res = await sbReq('POST','workers',dbObj,'');
+          DB.workers.push(mapW(res[0]));
+          count++;
+        } catch(ex) { errors++; console.warn(ex); }
+      }
+      var resEl = document.getElementById('imp-w-res');
+      if (resEl) resEl.innerHTML = '<span style="color:var(--grn)">✓ Zaimportowano '+count+' pracowników'+(errors?' (pominięto '+errors+')'  :'')+'</span>';
+    } else {
+      for (var j = 0; j < rows.length; j++) {
+        var rowV = rows[j];
+        var brand = rowV['marka']||rowV['brand']||'';
+        var model = rowV['model']||'';
+        if (!brand) { errors++; continue; }
+        showLoad('Importowanie pojazdów (' + (j+1) + '/' + rows.length + ')...');
+        try {
+          var dbObjV = { brand:brand, model:model, plate:(rowV['rejestracja']||rowV['plate']||'').toUpperCase(), year:rowV['rok']||null, vin:rowV['vin']||null, mileage:rowV['przebieg_km']||null, inspection:fmtImportDate(rowV['przeglad_do'])||null, insurance_oc:fmtImportDate(rowV['ubezpieczenie_oc_do'])||null, insurance_ac:fmtImportDate(rowV['ubezpieczenie_ac_do'])||null, service:fmtImportDate(rowV['nastepny_serwis'])||null, notes:rowV['uwagi']||null };
+          var resV = await sbReq('POST','vehicles',dbObjV,'');
+          DB.vehicles.push(mapV(resV[0]));
+          count++;
+        } catch(ex) { errors++; console.warn(ex); }
+      }
+      var resElV = document.getElementById('imp-v-res');
+      if (resElV) resElV.innerHTML = '<span style="color:var(--grn)">✓ Zaimportowano '+count+' pojazdów'+(errors?' (pominięto '+errors+')'  :'')+'</span>';
+    }
+    hideLoad(); renderAll(); toast('Import zakończony: ' + count + ' rekordów');
+  } catch(ex) { hideLoad(); toast('Błąd importu: '+ex.message,'err'); console.error(ex); }
+}
+
+async function importBackup(file) {
+  if (!file) return;
+  if (!confirm('Import doda dane do Supabase. Czy kontynuować?')) return;
+  try {
+    var text = await new Promise(function(res){ var r=new FileReader(); r.onload=function(e){res(e.target.result);}; r.readAsText(file,'UTF-8'); });
+    var data = JSON.parse(text);
+    showLoad('Importowanie kopii zapasowej...');
+    var stats = {companies:0,workers:0,equipment:0,medical:0,vehicles:0,assets:0};
+    if (data.companies) {
+      for (var i=0;i<data.companies.length;i++) {
+        var c=data.companies[i];
+        try{ var r=await sbReq('POST','companies',{name:c.name,nip:c.nip||null,regon:c.regon||null,address:c.address||null,phone:c.phone||null,email:c.email||null,icon:c.icon||'🏢'},''); c._nid=r[0].id; stats.companies++; }catch(e){}
+      }
+    }
+    var nco = function(oid){var c=data.companies&&data.companies.find(function(x){return x.id===oid;}); return c?c._nid:null;};
+    if (data.workers) {
+      for (var j=0;j<data.workers.length;j++) {
+        var w=data.workers[j];
+        try{ var rw=await sbReq('POST','workers',{firstname:w.firstname||'',lastname:w.lastname||'',position:w.position||'Pracownik',dept:w.dept||null,company_id:nco(w.companyId),status:w.status||'Aktywny',hire_date:w.hireDate||null,contract:w.contract||null,pesel:w.pesel||null,id_card:w.idCard||null,birth_date:w.birthDate||null,birth_place:w.birthPlace||null,address:w.address||null,city:w.city||null,zip:w.zip||null,phone:w.phone||null,email:w.email||null,emergency_name:w.emergencyName||null,emergency_phone:w.emergencyPhone||null,notes:w.notes||null,license_categories:w.licenseCategories||[],operators:w.operators||{},sep:w.sep||{},sep_nr:w.sepNr||null,sep_valid:w.sepValid||null,operator_nr:w.operatorNr||null,operator_valid:w.operatorValid||null},''); w._nid=rw[0].id; stats.workers++; }catch(e){}
+      }
+    }
+    var nw = function(oid){var w=data.workers&&data.workers.find(function(x){return x.id===oid;}); return w?w._nid:null;};
+    if (data.equipment) for (var k=0;k<data.equipment.length;k++){var eq=data.equipment[k];try{await sbReq('POST','equipment',{name:eq.name||'',category:eq.category||null,serial:eq.serial||null,worker_id:nw(eq.workerId),buy_date:eq.buyDate||null,value:eq.value||null,warranty:eq.warranty||null,condition:eq.condition||'Dobry',notes:eq.notes||null},'');stats.equipment++;}catch(e){}}
+    if (data.medical) for (var l=0;l<data.medical.length;l++){var m=data.medical[l];var wid=nw(m.workerId);if(!wid)continue;try{await sbReq('POST','medical',{worker_id:wid,type:m.type||'Okresowe',clinic:m.clinic||null,date:m.date||null,valid_to:m.validTo||null,notes:m.notes||null},'');stats.medical++;}catch(e){}}
+    if (data.vehicles) for (var n=0;n<data.vehicles.length;n++){var v=data.vehicles[n];try{await sbReq('POST','vehicles',{brand:v.brand||'',model:v.model||'',plate:v.plate||'',year:v.year||null,vin:v.vin||null,mileage:v.mileage||null,company_id:nco(v.companyId),driver_id:nw(v.driverId),inspection:v.inspection||null,insurance_oc:v.insuranceOC||null,insurance_ac:v.insuranceAC||null,notes:v.notes||null},'');stats.vehicles++;}catch(e){}}
+    if (data.assets) for (var p=0;p<data.assets.length;p++){var a=data.assets[p];try{await sbReq('POST','assets',{name:a.name||'',category:a.category||null,inv_num:a.invNum||null,company_id:nco(a.companyId),location:a.location||null,responsible_id:nw(a.responsibleId),buy_date:a.buyDate||null,value:a.value||null,condition:a.condition||'Dobry',notes:a.notes||null},'');stats.assets++;}catch(e){}}
+    await loadDB(); hideLoad(); renderAll();
+    toast('Zaimportowano: ' + stats.workers + ' prac., ' + stats.vehicles + ' poj., ' + stats.equipment + ' wyp.');
+  } catch(ex) { hideLoad(); toast('Błąd importu: '+ex.message,'err'); console.error(ex); }
+}
+
+function exportJSON() {
+  var blob = new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url;
+  a.download = 'domat_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Dane wyeksportowane');
+}
+
+async function clearAll() {
+  if (!confirm('Usunąć WSZYSTKIE dane z Supabase? Tej operacji nie można cofnąć!')) return;
+  showLoad('Usuwanie wszystkich danych...');
+  try {
+    var skip = '?id=neq.00000000-0000-0000-0000-000000000000';
+    await sbReq('DELETE','assets',null,skip);
+    await sbReq('DELETE','equipment',null,skip);
+    await sbReq('DELETE','medical',null,skip);
+    await sbReq('DELETE','vehicles',null,skip);
+    await sbReq('DELETE','workers',null,skip);
+    await sbReq('DELETE','companies',null,skip);
+    DB = {companies:[],workers:[],equipment:[],medical:[],vehicles:[],assets:[]};
+    hideLoad(); renderAll(); toast('Wszystkie dane usunięte');
+  } catch(e) { hideLoad(); toast('Błąd!','err'); console.error(e); }
+}
+
+// ============================================================
+// TILE CLICK — EVENT DELEGATION
+// ============================================================
+document.addEventListener('click', function(e) {
+  var tile = e.target.closest('.tile[data-wid]');
+  if (tile) {
+    var wid = tile.getAttribute('data-wid');
+    if (wid) openWorkerDetail(wid);
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('today').textContent = new Date().toLocaleDateString('pl-PL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+ACTIVE_CO = localStorage.getItem('dd_active_co') || '';
+
+(async function() {
+  await loadDB();
+  updateSelects();
+  renderDashboard();
+  updateBadges();
+})();
+</script>
+</body>
+</html>
