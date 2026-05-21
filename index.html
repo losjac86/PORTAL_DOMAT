@@ -276,8 +276,10 @@ textarea{resize:vertical;min-height:70px}
           <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="wf-q" oninput="renderWorkers()"></div>
         </div>
       </div>
-      <table><thead><tr><th>Pracownik</th><th>PESEL</th><th>Stanowisko</th><th>Firma</th><th>Dział</th><th>Telefon</th><th>Status</th><th>Akcje</th></tr></thead>
-      <tbody id="w-tbody"></tbody></table>
+      <div style="overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 280px)">
+        <table style="min-width:900px"><thead><tr><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Pracownik</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">PESEL</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Stanowisko</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Firma</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Dział</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">BHP</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Telefon</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Status</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Akcje</th></tr></thead>
+        <tbody id="w-tbody"></tbody></table>
+      </div>
     </div>
   </div>
 </div>
@@ -633,6 +635,19 @@ textarea{resize:vertical;min-height:70px}
       <div class="fg"><label>Nr świadectwa SEP</label><input id="wm-sepnr" placeholder="12345/E/2024"></div>
       <div class="fg"><label>SEP ważne do</label><input type="date" id="wm-sepvalid"></div>
       <div class="fsep"></div>
+      <div class="fsep"></div>
+      <div class="flbl">🦺 Szkolenie BHP</div>
+      <div class="fg"><label>Data szkolenia BHP</label><input type="date" id="wm-bhp-date"></div>
+      <div class="fg"><label>BHP ważne do</label><input type="date" id="wm-bhp-valid"></div>
+      <div class="fg"><label>Typ szkolenia BHP</label>
+        <select id="wm-bhp-type">
+          <option>Wstępne ogólne</option>
+          <option>Wstępne stanowiskowe</option>
+          <option>Okresowe</option>
+          <option>Specjalistyczne</option>
+        </select>
+      </div>
+      <div class="fg"><label>Instruktor / Firma BHP</label><input id="wm-bhp-trainer" placeholder="np. BHP-Serwis Sp. z o.o."></div>
       <div class="fg s2"><label>Uwagi</label><textarea id="wm-notes" placeholder="Dodatkowe informacje..."></textarea></div>
     </div>
   </div>
@@ -857,7 +872,8 @@ function mapW(r) {
     licenseNr: r.license_nr,
     operators: r.operators || {},
     operatorNr: r.operator_nr, operatorValid: r.operator_valid,
-    sep: r.sep || {}, sepNr: r.sep_nr, sepValid: r.sep_valid
+    sep: r.sep || {}, sepNr: r.sep_nr, sepValid: r.sep_valid,
+    bhpDate: r.bhp_date, bhpValid: r.bhp_valid, bhpType: r.bhp_type, bhpTrainer: r.bhp_trainer
   };
 }
 function mapE(r) {
@@ -1069,7 +1085,7 @@ function openWModal(id) {
 }
 
 function clearWForm() {
-  ['wm-fn','wm-ln','wm-pos','wm-phone','wm-email','wm-pesel','wm-idcard','wm-birth','wm-birthplace','wm-addr','wm-city','wm-zip','wm-hire','wm-contract-end','wm-contract-sign','wm-emname','wm-emphone','wm-licnr','wm-opnr','wm-opvalid','wm-sepnr','wm-sepvalid','wm-notes'].forEach(function(id) { sv(id, ''); });
+  ['wm-fn','wm-ln','wm-pos','wm-phone','wm-email','wm-pesel','wm-idcard','wm-birth','wm-birthplace','wm-addr','wm-city','wm-zip','wm-hire','wm-contract-end','wm-contract-sign','wm-emname','wm-emphone','wm-licnr','wm-opnr','wm-opvalid','wm-sepnr','wm-sepvalid','wm-notes','wm-bhp-date','wm-bhp-valid','wm-bhp-trainer'].forEach(function(id) { sv(id, ''); });
   ['op-koparka','op-ladowarka','op-dzwig','op-wozek','op-podnosnik','op-koparko','op-mini','op-suwnica','sep-g1e','sep-g1d','sep-g2e','sep-g2d','sep-g3e','sep-g3d','sep-pom'].forEach(function(id) { sc(id, false); });
   var lic = document.getElementById('wm-lic');
   if (lic) Array.from(lic.options).forEach(function(o) { o.selected = false; });
@@ -1099,6 +1115,10 @@ function fillWForm(w) {
   sc('sep-g2d', sep.g2d); sc('sep-g3e', sep.g3e); sc('sep-g3d', sep.g3d); sc('sep-pom', sep.pom);
   sv('wm-sepnr', w.sepNr); sv('wm-sepvalid', w.sepValid);
   sv('wm-notes', w.notes);
+  sv('wm-bhp-date', w.bhpDate);
+  sv('wm-bhp-valid', w.bhpValid);
+  sv('wm-bhp-type', w.bhpType);
+  sv('wm-bhp-trainer', w.bhpTrainer);
   toggleContractEnd();
 }
 
@@ -1206,7 +1226,9 @@ async function saveWorker() {
     operators: { koparka: gc('op-koparka'), ladowarka: gc('op-ladowarka'), dzwig: gc('op-dzwig'), wozek: gc('op-wozek'), podnosnik: gc('op-podnosnik'), koparko: gc('op-koparko'), mini: gc('op-mini'), suwnica: gc('op-suwnica') },
     operator_nr: gv('wm-opnr') || null, operator_valid: gv('wm-opvalid') || null,
     sep: { g1e: gc('sep-g1e'), g1d: gc('sep-g1d'), g2e: gc('sep-g2e'), g2d: gc('sep-g2d'), g3e: gc('sep-g3e'), g3d: gc('sep-g3d'), pom: gc('sep-pom') },
-    sep_nr: gv('wm-sepnr') || null, sep_valid: gv('wm-sepvalid') || null
+    sep_nr: gv('wm-sepnr') || null, sep_valid: gv('wm-sepvalid') || null,
+    bhp_date: gv('wm-bhp-date') || null, bhp_valid: gv('wm-bhp-valid') || null,
+    bhp_type: gv('wm-bhp-type') || null, bhp_trainer: gv('wm-bhp-trainer') || null
   };
   try {
     showLoad('Zapisywanie...');
@@ -1273,6 +1295,27 @@ async function saveVehicle() {
       DB.vehicles.push(mapV(res[0]));
     }
     hideLoad(); closeModal('vehicle'); renderAll(); toast('Pojazd zapisany');
+    // Auto-assign vehicle to driver's equipment card
+    var driverId = gv('vm-driver');
+    if (driverId && res && res[0]) {
+      var veh = mapV(res[0]);
+      var existingEquip = DB.equipment.find(function(e) {
+        return e.workerId === driverId && e.category === 'Pojazd służbowy' && e.serial === veh.plate;
+      });
+      if (!existingEquip) {
+        var eqObj = {
+          name: veh.brand + ' ' + veh.model + ' (' + veh.plate + ')',
+          category: 'Pojazd służbowy',
+          serial: veh.plate,
+          worker_id: driverId,
+          condition: 'Dobry',
+          notes: 'Automatycznie przypisany pojazd służbowy'
+        };
+        sbReq('POST', 'equipment', eqObj, '').then(function(er) {
+          if (er && er[0]) { DB.equipment.push(mapE(er[0])); renderAll(); }
+        }).catch(function(){});
+      }
+    }
   } catch(e) { hideLoad(); toast('Błąd zapisu!', 'err'); console.error(e); }
 }
 
@@ -1388,6 +1431,7 @@ function buildWorkerTile(w) {
       '<div style="display:flex;justify-content:space-between;font-size:11px"><span style="color:var(--txt2)">🏥 Badania</span><span style="font-weight:700;color:' + medCol + '">' + medTxt + '</span></div>' +
       (days !== null ? '<div style="height:3px;background:var(--surf3);border-radius:2px"><div style="height:100%;width:' + Math.min(100, Math.max(3, days <= 0 ? 100 : days/365*100)) + '%;background:' + medCol + ';border-radius:2px"></div></div>' : '') +
       (sepList.length ? '<div style="font-size:10px;color:var(--txt2)">⚡ ' + sepList.join(', ') + '</div>' : '') +
+      (w.bhpValid ? '<div style="font-size:10px;color:' + (daysLeft(w.bhpValid)<0?'var(--red)':daysLeft(w.bhpValid)<=30?'var(--org)':'var(--txt2)') + '">🦺 BHP: ' + fmtDate(w.bhpValid) + '</div>' : '') +
       (opList.length ? '<div style="font-size:10px;color:var(--txt2)">🏗️ ' + opList.join(', ') + '</div>' : '') +
       (lic ? '<div style="font-size:10px;color:var(--txt2)">🚗 ' + lic + '</div>' : '') +
     '</div>' +
@@ -1410,6 +1454,14 @@ function buildAlerts(cf) {
     if (v.inspection && iD <= 30) alerts.push({ type: iD < 0 ? 'd' : 'w', icon: '🔧', title: 'Przegląd — ' + vn, desc: iD < 0 ? ('Wygasł ' + Math.abs(iD) + 'd temu') : ('Pozostało ' + iD + 'd'), date: fmtDate(v.inspection) });
     if (v.insuranceOC && oD <= 30) alerts.push({ type: oD < 0 ? 'd' : 'w', icon: '🛡️', title: 'OC — ' + vn, desc: oD < 0 ? ('Wygasło ' + Math.abs(oD) + 'd temu') : ('Pozostało ' + oD + 'd'), date: fmtDate(v.insuranceOC) });
   });
+  // BHP alerts
+  DB.workers.forEach(function(w) {
+    if (!w.bhpValid) return;
+    var days = daysLeft(w.bhpValid); if (days > 30) return;
+    if (cf && w.companyId !== cf) return;
+    var n = w.firstname + ' ' + w.lastname;
+    alerts.push({ type: days < 0 ? 'd' : 'w', icon: '🦺', title: 'Szkolenie BHP — ' + n, desc: (w.bhpType||'Szkolenie') + ' | ' + (days < 0 ? 'Wygasło ' + Math.abs(days) + 'd temu' : 'Pozostało ' + days + 'd'), date: fmtDate(w.bhpValid) });
+  });
   return alerts.sort(function(a,b) { return a.type === 'd' ? -1 : 1; });
 }
 
@@ -1430,7 +1482,8 @@ function renderWorkers() {
     var ini = (w.firstname[0]||'') + (w.lastname[0]||'');
     var co = DB.companies.find(function(x) { return x.id === w.companyId; });
     var med = DB.medical.filter(function(m) { return m.workerId === w.id; }).sort(function(a,b) { return new Date(b.validTo)-new Date(a.validTo); })[0];
-    var medBdg = med ? statusBadge(daysLeft(med.validTo)) : '<span class="bdg by">Brak</span>';
+    var bhpDays = w.bhpValid ? daysLeft(w.bhpValid) : null;
+    var bhpBdg = bhpDays === null ? '<span class="bdg by">Brak BHP</span>' : statusBadge(bhpDays);
     return '<tr>' +
       '<td><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:' + c + '">' + ini + '</div><div>' +
         '<div style="font-weight:600;cursor:pointer;color:var(--acc)" onclick="openWorkerDetail(\'' + w.id + '\')">' + w.firstname + ' ' + w.lastname + '</div>' +
@@ -1439,6 +1492,7 @@ function renderWorkers() {
       '<td>' + w.position + '</td>' +
       '<td>' + (co ? '<span class="bdg bb">' + (co.icon||'🏢') + ' ' + co.name + '</span>' : '—') + '</td>' +
       '<td><span class="bdg bgr">' + (w.dept||'—') + '</span></td>' +
+      '<td>' + bhpBdg + (w.bhpValid ? '<div class="mono" style="font-size:10px;color:var(--txt3)">' + fmtDate(w.bhpValid) + '</div>' : '') + '</td>' +
       '<td class="mono">' + (w.phone||'—') + '</td>' +
       '<td><span class="bdg ' + (stMap[w.status]||'bgr') + '">' + (w.status||'—') + '</span></td>' +
       '<td><div style="display:flex;gap:4px">' +
@@ -1470,6 +1524,7 @@ function openWorkerDetail(id) {
     {l:'Typ umowy',v:w.contract},{l:'Koniec umowy',v:w.contractEnd?fmtDate(w.contractEnd):'Bezterminowa'},{l:'Status',v:w.status},
     {l:'Kontakt alarmowy',v:(w.emergencyName||'—')+' '+( w.emergencyPhone||'')},{l:'Prawo jazdy',v:(w.licenseCategories||[]).join(', ')||'Brak'},{l:'Nr PJ',v:w.licenseNr},
     {l:'SEP',v:sepList},{l:'Nr SEP / ważne do',v:(w.sepNr||'—')+' / '+fmtDate(w.sepValid)},{l:'Uprawnienia UDT',v:opList},
+    {l:'Szkolenie BHP',v:w.bhpType},{l:'BHP ważne do',v:fmtDate(w.bhpValid)},{l:'Instruktor BHP',v:w.bhpTrainer},
     {l:'Nr UDT',v:w.operatorNr},{l:'UDT ważne do',v:fmtDate(w.operatorValid)},{l:'Uwagi',v:w.notes}
   ];
   document.getElementById('wd-info-grid').innerHTML = fields.map(function(f) {
