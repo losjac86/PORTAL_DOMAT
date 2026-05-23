@@ -47,6 +47,373 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt
 .topbar h2{font-size:18px;font-weight:700}
 .topbar p{font-size:12px;color:var(--txt2);margin-top:2px}
 .tb-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--rs);font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-p{background:var(--acc);color:#fff}.btn-p:hover{background:#2d6fee;transform:translateY(-1px)}
+.btn-s{background:var(--surf2);color:var(--txt);border:1px solid var(--b2)}.btn-s:hover{background:var(--surf3)}
+.btn-g{background:rgba(0,229,160,.12);color:var(--grn);border:1px solid rgba(0,229,160,.25)}.btn-g:hover{background:rgba(0,229,160,.2)}
+.btn-d{background:rgba(255,77,109,.12);color:var(--red);border:1px solid rgba(255,77,109,.25)}.btn-d:hover{background:rgba(255,77,109,.2)}
+.btn-o{background:rgba(255,176,32,.12);color:var(--org);border:1px solid rgba(255,176,32,.25)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.sc{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:16px;transition:.2s}
+.sc:hover{border-color:var(--b2);transform:translateY(-1px)}
+.sc-ico{font-size:20px;margin-bottom:8px}
+.sc-val{font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.sc-lbl{font-size:11px;color:var(--txt2);margin-top:3px;font-weight:500}
+
+/* TABLE */
+.tw{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);overflow:hidden}
+.th{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tt{font-size:14px;font-weight:700;white-space:nowrap}
+.tc{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sbox{display:flex;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--b);border-radius:var(--rs);padding:6px 10px}
+.sbox input{background:none;border:none;outline:none;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;width:160px}
+.sbox input::placeholder{color:var(--txt3)}
+.fsel{background:var(--surf2);border:1px solid var(--b);border-radius:var(--rs);padding:6px 10px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:.8px;text-transform:uppercase;background:var(--surf2);border-bottom:1px solid var(--b)}
+td{padding:11px 14px;font-size:12px;color:var(--txt);border-bottom:1px solid var(--b);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.bg{background:rgba(0,229,160,.12);color:var(--grn)}
+.br{background:rgba(255,77,109,.12);color:var(--red)}
+.by{background:rgba(255,176,32,.12);color:var(--org)}
+.bb{background:rgba(61,127,255,.12);color:var(--acc)}
+.bp{background:rgba(180,138,255,.12);color:var(--pur)}
+.bgr{background:rgba(136,150,179,.12);color:var(--txt2)}
+
+/* TILES */
+.tile{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;transition:all .2s;cursor:pointer}
+.tile:hover{border-color:var(--b2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.tile:active{transform:translateY(0)}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.ov.open{display:flex}
+.modal{background:var(--surf);border:1px solid var(--b2);border-radius:var(--rl);width:700px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-lg{width:860px}
+.mh{padding:22px 24px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surf);z-index:1}
+.mh h3{font-size:16px;font-weight:700}
+.mb{padding:24px}
+.mf{padding:16px 24px;border-top:1px solid var(--b);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surf)}
+.x-btn{background:none;border:none;color:var(--txt2);cursor:pointer;font-size:18px;padding:4px;border-radius:4px;transition:.15s}
+.x-btn:hover{color:var(--txt);background:var(--surf2)}
+
+/* FORMS */
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.s2{grid-column:span 2}
+.fg.s3{grid-column:span 3}
+label{font-size:11px;font-weight:600;color:var(--txt2);letter-spacing:.4px}
+.req{color:var(--red)}
+input,select,textarea{background:var(--surf2);border:1px solid var(--b2);border-radius:var(--rs);padding:8px 10px;color:var(--txt);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;transition:.15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-g)}
+select option{background:var(--surf2)}
+textarea{resize:vertical;min-height:70px}
+.fsep{grid-column:1/-1;border:none;border-top:1px solid var(--b);margin:4px 0}
+.flbl{grid-column:1/-1;font-size:10px;font-weight:700;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.chk-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chk-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--txt)}
+.chk-lbl input[type=checkbox]{width:auto;accent-color:var(--acc)}
+
+/* ALERTS */
+.al{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--rs);margin-bottom:8px;border-left:3px solid}
+.al-d{background:rgba(255,77,109,.07);border-color:var(--red)}
+.al-w{background:rgba(255,176,32,.07);border-color:var(--org)}
+.al-s{background:rgba(0,229,160,.07);border-color:var(--grn)}
+.al-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.al-body{flex:1}
+.al-title{font-size:12px;font-weight:600}
+.al-desc{font-size:11px;color:var(--txt2);margin-top:2px}
+.al-date{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--txt3);white-space:nowrap}
+
+/* PAGES */
+.pg{display:none}.pg.active{display:block}
+
+/* WORKER DETAIL */
+.wd-tabs{display:flex;gap:4px;margin-bottom:16px}
+.wtab{padding:7px 14px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;color:var(--txt2);background:none;border:1px solid transparent;transition:.15s;font-family:'IBM Plex Sans',sans-serif}
+.wtab:hover{background:var(--surf2);color:var(--txt)}
+.wtab.active{background:var(--acc-g);color:var(--acc);border-color:rgba(61,127,255,.2)}
+.wt{display:none}.wt.active{display:block}
+.igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.icard{background:var(--surf);border:1px solid var(--b);border-radius:var(--r);padding:14px}
+.icard-lbl{font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:.6px;text-transform:uppercase}
+.icard-val{font-size:13px;font-weight:600;margin-top:4px}
+.eq-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surf2);border-radius:var(--rs);margin-bottom:6px;border:1px solid var(--b)}
+
+/* IMPORT */
+.drop{border:2px dashed var(--b2);border-radius:var(--r);padding:30px;text-align:center;cursor:pointer;transition:.2s}
+.drop:hover{border-color:var(--acc);background:var(--acc-g)}
+.drop-ico{font-size:32px;margin-bottom:10px}
+
+/* PDF */
+.pdf{background:#fff;color:#000;padding:36px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;line-height:1.6;max-width:700px;margin:0 auto;border-radius:var(--r)}
+.pdf h2{font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
+.pdf-sub{text-align:center;font-size:11px;color:#666;margin-bottom:16px}
+.pdf hr{border:none;border-top:1px solid #ddd;margin:12px 0}
+.pdf-sec h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #3d7fff;padding-bottom:4px;margin-bottom:10px;color:#3d7fff}
+.pdf-sec{margin-bottom:14px}
+.pdf-f{display:flex;margin-bottom:5px}
+.pdf-fl{font-weight:600;width:190px;flex-shrink:0;font-size:11px;color:#444}
+.pdf-fv{border-bottom:1px solid #ccc;flex:1;min-height:18px;font-size:11px}
+.pdf-sign{display:flex;gap:40px;margin-top:28px}
+.pdf-sign-box{flex:1;border-top:1px solid #000;padding-top:8px;text-align:center;font-size:10px;color:#666}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surf2);border:1px solid var(--b2);border-radius:var(--rs);padding:12px 16px;font-size:12px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s;display:flex;align-items:center;gap:8px;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(0,229,160,.4);color:var(--grn)}
+.toast.err{border-color:rgba(255,77,109,.4);color:var(--red)}
+
+.tbl-scroll{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 270px);flex:1}
+.tbl-scroll table{min-width:750px}
+.tbl-scroll th{position:sticky;top:0;z-index:2;background:var(--surf2)}
+.tiles-scroll{overflow-y:auto;max-height:calc(100vh - 220px);padding-right:6px;flex:1}
+/* LOADER */
+.loader{position:fixed;inset:0;background:rgba(10,12,18,.85);z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px)}
+.loader.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--b2);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-txt{font-size:13px;color:var(--txt2)}
+
+/* MISC */
+.mono{font-family:'IBM Plex Mono',monospace;font-size:11px}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-txt" id="loader-txt">Łączenie z bazą danych...</div>
+</div>
+
+<div class="app">
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="sb-icon">🏗️</div>
+      <div><h1>Domat &amp; Dominet</h1><p>System zarządzania</p></div>
+    </div>
+    <div class="co-pill" onclick="navTo('settings')">
+      <div><div class="co-name" id="sb-co-name">— wybierz firmę —</div><div class="co-sub">Kliknij aby zmienić</div></div>
+      <span style="color:var(--txt3)">⚙</span>
+    </div>
+  </div>
+
+  <div class="nav-g">
+    <div class="nav-lbl">Główne</div>
+    <div class="ni active" data-page="dashboard" onclick="navTo('dashboard')"><span class="ic">📊</span>Dashboard</div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Zasoby ludzkie</div>
+    <div class="ni" data-page="workers" onclick="navTo('workers')"><span class="ic">👤</span>Pracownicy</div>
+    <div class="ni" data-page="equipment" onclick="navTo('equipment')"><span class="ic">🔧</span>Wyposażenie</div>
+    <div class="ni" data-page="medical-list" onclick="navTo('medical-list')"><span class="ic">🏥</span>Badania lek.<span class="nbadge w" id="bdg-med" style="display:none">0</span></div>
+    <div class="ni" data-page="medical-tiles" onclick="navTo('medical-tiles')"><span class="ic">🗂️</span>Przegląd badań</div>
+    <div class="ni" data-page="uprawnienia" onclick="navTo('uprawnienia')"><span class="ic">⚡</span>Uprawnienia<span class="nbadge" id="bdg-sep" style="display:none">0</span></div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Flota</div>
+    <div class="ni" data-page="vehicles" onclick="navTo('vehicles')"><span class="ic">🚗</span>Pojazdy<span class="nbadge" id="bdg-veh" style="display:none">0</span></div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Majątek</div>
+    <div class="ni" data-page="assets" onclick="navTo('assets')"><span class="ic">💼</span>Aktywa firmowe</div>
+  </div>
+  <div class="nav-g">
+    <div class="nav-lbl">Dokumenty</div>
+    <div class="ni" data-page="documents" onclick="navTo('documents')"><span class="ic">📄</span>Generuj dokumenty</div>
+    <div class="ni" data-page="import" onclick="navTo('import')"><span class="ic">📥</span>Import danych</div>
+  </div>
+  <div class="sb-foot">
+    <div class="ni" data-page="settings" onclick="navTo('settings')"><span class="ic">⚙️</span>Ustawienia firm</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="pg active">
+  <div class="topbar"><div><h2>Dashboard</h2><p id="today"></p></div>
+    <div class="tb-r">
+      <select class="fsel" id="dash-cf" onchange="renderDashboard()"><option value="">Wszystkie firmy</option></select>
+      <button class="btn btn-s btn-sm" onclick="exportJSON()">📤 Eksport JSON</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="stats" id="dash-stats"></div>
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--txt2)">⚠️ Alerty i terminy</h3>
+    <div id="dash-alerts"></div>
+    <div id="dash-tiles-wrap"></div>
+  </div>
+</div>
+
+<!-- PRACOWNICY -->
+<div id="pg-workers" class="pg">
+  <div class="topbar"><div><h2>Pracownicy</h2><p>Kartoteki osobowe</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openWModal()">+ Dodaj pracownika</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Lista pracowników</span>
+        <div class="tc">
+          <select class="fsel" id="wf-co" onchange="renderWorkers()"><option value="">Wszystkie firmy</option></select>
+          <select class="fsel" id="wf-dept" onchange="renderWorkers()"><option value="">Wszystkie działy</option></select>
+          <select class="fsel" id="wf-status" onchange="renderWorkers()"><option value="">Wszystkie statusy</option><option>Aktywny</option><option>Urlop</option><option>Zwolnienie lekarskie</option><option>Nieaktywny</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="wf-q" oninput="renderWorkers()"></div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 280px)">
+        <table style="min-width:900px"><thead><tr><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Pracownik</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">PESEL</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Stanowisko</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Firma</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Dział</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">BHP</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Telefon</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Status</th><th style="position:sticky;top:0;z-index:2;background:var(--surf2)">Akcje</th></tr></thead>
+        <tbody id="w-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KARTA PRACOWNIKA -->
+<div id="pg-worker-detail" class="pg">
+  <div class="topbar">
+    <div><h2 id="wd-name">—</h2><p id="wd-sub">—</p></div>
+    <div class="tb-r">
+      <button class="btn btn-s btn-sm" onclick="navTo('workers')">← Wróć</button>
+      <button class="btn btn-o btn-sm" id="wd-edit-btn">✏️ Edytuj</button>
+      <button class="btn btn-g btn-sm" onclick="genDoc('skierowanie')">🏥 Skierowanie</button>
+      <button class="btn btn-g btn-sm" onclick="navTo('documents')">📄 Umowa</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="wd-tabs">
+      <button class="wtab active" onclick="showWTab('info',this)">📋 Dane osobowe</button>
+      <button class="wtab" onclick="showWTab('equip',this)">🔧 Wyposażenie</button>
+      <button class="wtab" onclick="showWTab('medical',this)">🏥 Badania</button>
+      <button class="wtab" onclick="showWTab('docs',this)">📄 Dokumenty</button>
+    </div>
+    <div id="wt-info" class="wt active"><div class="igrid" id="wd-info-grid"></div></div>
+    <div id="wt-equip" class="wt">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:700">Wyposażenie pracownika</span>
+        <button class="btn btn-p btn-sm" onclick="openEModal()">+ Dodaj</button>
+      </div>
+      <div id="wd-equip-list"></div>
+    </div>
+    <div id="wt-medical" class="wt">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:700">Historia badań lekarskich</span>
+        <button class="btn btn-p btn-sm" id="add-med-btn">+ Dodaj badanie</button>
+      </div>
+      <div id="wd-med-list"></div>
+    </div>
+    <div id="wt-docs" class="wt">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-g btn-sm" onclick="genDoc('skierowanie')">🏥 Skierowanie</button>
+        <button class="btn btn-g btn-sm" onclick="genDoc('umowa-praca')">📄 Umowa o pracę</button>
+        <button class="btn btn-g btn-sm" onclick="genDoc('umowa-zlecenie')">📄 Umowa zlecenie</button>
+        <button class="btn btn-g btn-sm" onclick="genDoc('karta-wyposazenia')">🔧 Karta wyposażenia</button>
+        <button class="btn btn-p btn-sm" onclick="printDoc()">🖨️ Drukuj</button>
+      </div>
+      <div id="wd-doc-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WYPOSAŻENIE -->
+<div id="pg-equipment" class="pg">
+  <div class="topbar"><div><h2>Wyposażenie</h2><p>Rejestr narzędzi i sprzętu</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openEModal()">+ Dodaj wyposażenie</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Rejestr wyposażenia</span>
+        <div class="tc">
+          <select class="fsel" id="ef-cat" onchange="renderEquipment()"><option value="">Wszystkie kategorie</option></select>
+          <select class="fsel" id="ef-w" onchange="renderEquipment()"><option value="">Wszyscy pracownicy</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="ef-q" oninput="renderEquipment()"></div>
+        </div>
+      </div>
+      <div class="tbl-scroll"><table><thead><tr><th>Nazwa</th><th>Kategoria</th><th>Nr seryjny</th><th>Przypisany do</th><th>Data zakupu</th><th>Wartość</th><th>Gwarancja</th><th>Akcje</th></tr></thead>
+      <tbody id="e-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- BADANIA LIST -->
+<div id="pg-medical-list" class="pg">
+  <div class="topbar"><div><h2>Badania lekarskie</h2><p>Terminy i ważność</p></div>
+    <div class="tb-r"><button class="btn btn-p" onclick="openMModal()">+ Dodaj badanie</button></div>
+  </div>
+  <div class="content">
+    <div class="tw">
+      <div class="th"><span class="tt">Rejestr badań</span>
+        <div class="tc">
+          <select class="fsel" id="mf-s" onchange="renderMedicalList()"><option value="">Wszystkie</option><option value="ok">Aktualne</option><option value="warn">Wygasające</option><option value="exp">Przeterminowane</option></select>
+          <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="mf-q" oninput="renderMedicalList()"></div>
+        </div>
+      </div>
+      <div class="tbl-scroll"><table><thead><tr><th>Pracownik</th></div>ead>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domat &amp; Dominet</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+:root{
+  --bg:#0a0c12;--surf:#111520;--surf2:#171d2e;--surf3:#1e2540;
+  --b:#242d44;--b2:#2e3a58;--b3:#3a4a6b;
+  --acc:#3d7fff;--acc-g:rgba(61,127,255,.15);
+  --grn:#00e5a0;--org:#ffb020;--red:#ff4d6d;--pur:#b48aff;
+  --txt:#dce3f0;--txt2:#8896b3;--txt3:#4a5570;
+  --r:10px;--rs:6px;--rl:16px;
+}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--txt);font-size:14px}
+.app{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sb{width:220px;min-width:220px;background:var(--surf);border-right:1px solid var(--b);display:flex;flex-direction:column;overflow-y:auto}
+.sb-head{padding:20px 16px 16px;border-bottom:1px solid var(--b)}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sb-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--pur));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.sb-logo h1{font-size:13px;font-weight:700}
+.sb-logo p{font-size:10px;color:var(--txt3);margin-top:1px}
+.co-pill{background:var(--surf2);border:1px solid var(--b2);border-radius:var(--rs);padding:8px 10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:.15s}
+.co-pill:hover{border-color:var(--acc)}
+.co-name{font-size:12px;font-weight:600;color:var(--acc)}
+.co-sub{font-size:10px;color:var(--txt3);margin-top:1px}
+.nav-g{padding:12px 10px 4px}
+.nav-lbl{font-size:10px;font-weight:600;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;padding:0 6px;margin-bottom:4px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:var(--rs);cursor:pointer;font-size:13px;font-weight:500;color:var(--txt2);margin-bottom:1px;border:1px solid transparent;transition:.15s;position:relative;user-select:none}
+.ni:hover{background:var(--surf2);color:var(--txt)}
+.ni.active{background:var(--acc-g);color:var(--acc);border-color:rgba(61,127,255,.2)}
+.ni .ic{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;min-width:16px;text-align:center}
+.nbadge.w{background:var(--org);color:#000}
+.sb-foot{margin-top:auto;padding:12px 10px;border-top:1px solid var(--b)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;background:var(--surf);flex-shrink:0}
+.topbar h2{font-size:18px;font-weight:700}
+.topbar p{font-size:12px;color:var(--txt2);margin-top:2px}
+.tb-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .content{flex:1;overflow-y:auto;padding:24px 28px}
 
 /* BUTTONS */
@@ -176,6 +543,10 @@ textarea{resize:vertical;min-height:70px}
 .toast.ok{border-color:rgba(0,229,160,.4);color:var(--grn)}
 .toast.err{border-color:rgba(255,77,109,.4);color:var(--red)}
 
+.tbl-scroll{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 290px)}
+.tbl-scroll table{min-width:750px}
+.tbl-scroll th{position:sticky;top:0;z-index:2;background:var(--surf2)}
+.tiles-scroll{overflow-y:auto;max-height:calc(100vh - 200px);padding-right:4px}
 /* LOADER */
 .loader{position:fixed;inset:0;background:rgba(10,12,18,.85);z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px)}
 .loader.show{display:flex}
@@ -363,8 +734,8 @@ textarea{resize:vertical;min-height:70px}
           <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="mf-q" oninput="renderMedicalList()"></div>
         </div>
       </div>
-      <table><thead><tr><th>Pracownik</th><th>Typ</th><th>Data badania</th><th>Ważne do</th><th>Pozostało</th><th>Status</th><th>Akcje</th></tr></thead>
-      <tbody id="m-tbody"></tbody></table>
+      <div class="tbl-scroll"><table><thead><tr><th>Pracownik</th><th>Typ</th><th>Data badania</th><th>Ważne do</th><th>Pozostało</th><th>Status</th><th>Akcje</th></tr></thead>
+      <tbody id="m-tbody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -381,7 +752,7 @@ textarea{resize:vertical;min-height:70px}
   </div>
   <div class="content">
     <div id="mt-summary" class="stats" style="grid-template-columns:repeat(4,1fr)"></div>
-    <div id="mt-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px"></div>
+    <div class="tiles-scroll"><div id="mt-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px"></div></div>
   </div>
 </div>
 
@@ -396,7 +767,7 @@ textarea{resize:vertical;min-height:70px}
   </div>
   <div class="content">
     <div id="uf-summary" class="stats" style="grid-template-columns:repeat(4,1fr)"></div>
-    <div id="uf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div>
+    <div class="tiles-scroll"><div id="uf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div></div>
   </div>
 </div>
 
@@ -414,8 +785,8 @@ textarea{resize:vertical;min-height:70px}
           <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="vf-q" oninput="renderVehicles()"></div>
         </div>
       </div>
-      <table><thead><tr><th>Pojazd</th><th>Nr rej.</th><th>Firma</th><th>Kierowca</th><th>Przegląd tech.</th><th>OC do</th><th>AC do</th><th>Status</th><th>Akcje</th></tr></thead>
-      <tbody id="v-tbody"></tbody></table>
+      <div class="tbl-scroll"><table><thead><tr><th>Pojazd</th><th>Nr rej.</th><th>Firma</th><th>Kierowca</th><th>Przegląd tech.</th><th>OC do</th><th>AC do</th><th>Status</th><th>Akcje</th></tr></thead>
+      <tbody id="v-tbody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -434,8 +805,8 @@ textarea{resize:vertical;min-height:70px}
           <div class="sbox"><span>🔍</span><input type="text" placeholder="Szukaj..." id="af-q" oninput="renderAssets()"></div>
         </div>
       </div>
-      <table><thead><tr><th>Nazwa</th><th>Kategoria</th><th>Nr inw.</th><th>Firma</th><th>Lokalizacja</th><th>Wartość</th><th>Stan</th><th>Akcje</th></tr></thead>
-      <tbody id="a-tbody"></tbody></table>
+      <div class="tbl-scroll"><table><thead><tr><th>Nazwa</th><th>Kategoria</th><th>Nr inw.</th><th>Firma</th><th>Lokalizacja</th><th>Wartość</th><th>Stan</th><th>Akcje</th></tr></thead>
+      <tbody id="a-tbody"></tbody></table></div>
     </div>
   </div>
 </div>
@@ -1399,7 +1770,7 @@ function renderDashboard() {
     return buildWorkerTile(w);
   }).join('');
 
-  tilesWrap.innerHTML = '<h3 style="font-size:14px;font-weight:700;margin:20px 0 14px;color:var(--txt2)">👥 Kafelki pracowników</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">' + tilesHtml + '</div>';
+  tilesWrap.innerHTML = '<h3 style="font-size:14px;font-weight:700;margin:20px 0 14px;color:var(--txt2)">👥 Kafelki pracowników</h3><div class="tiles-scroll"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">' + tilesHtml + '</div></div>';
 
   updateBadges();
 }
